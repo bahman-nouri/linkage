@@ -1,0 +1,615 @@
+' ******************************************************************************
+' OPTIMIZE.WBS - SIMPLE OPTIMIZER
+'	
+' Version 1.1, Created by Knowledge Revolution
+' Umberto Milletti - 7/95 Final version for v3.0 release (1.0)
+' Ken Tokusei - 9/96 Revised for a new release (1.1)
+' (C) Copyright Knowledge Revolution 1996   All Rights Reserved
+'
+' ******************************************************************************
+
+' Forward declarations to avoid syntax errors with Option Explicit
+Declare Sub cmdOptimize (Document as WMDocument, P0() as double)
+Declare Sub FindRange(Doc as WMDocument, P0() as Double, Cost0 as Double, PB() as Double, CostB() as Double)
+Declare Sub GoldenSearch(Doc as WMDocument, ByRef PB() as Double, ByRef CostB() as Double)
+Declare Function Cost(ByVal Doc as WMDocument, Byval Parameters As Double) as Double
+Declare Sub DisplayHelp
+Declare Function ReadHelpFile(file as string, HelpString() as string) as integer   ' In Libhelp.wbs
+Declare Sub CopyArray(A() As Double, B() As Double)
+Declare Sub DebugPrint (Message as string)
+Declare Sub PrintMatrix(A() As Double)
+Declare Sub PrintVector(V() As Double)
+Declare Function RunMe(P0 as double, tol0 as double, delp0 as double)
+
+Option Explicit
+
+
+' Constants used below
+CONST DEBUG = 0	 	' This constant should be 0, unless debugging the Optimize code (1 for file output, 2 for file and viewport (not available on macintosh))
+CONST tiny = 1e-15
+
+Public tol as Double	 	' Used for convergence testing in GoldenSearch
+Public delp as Double		' Used in finding gradients in FindRange
+Public iter as integer		' Number of iterations (simulations run)
+Public os as string			' Operating system ("win","mac")
+Public WMDir as string		' Working Model startup directory
+Public ScriptDir as string	' SCRIPTS directory
+Public silent 				' This constant can be set to TRUE to avoid all the interactive dialogs
+Public Pfinal(2) as double	' Used to store the lower and upper bounds of the optimal parameter value
+Public CostFinal(2) as double ' Costs relative to the value of Pfinal
+Public P0(3) as double		' Used to store: 1- initial guess at parameter, 2-the minimum and 3- maximum values for the optimal parameter
+Public Cost0 as double		' Cost relative to P0(1)  
+
+
+Function StartCallBack (ID as string, Action as integer, SuppValue as integer)
+
+	DebugPrint "In callback, action: "+str$(action)+" ID"+ID
+	Select Case Action
+		Case 1 					' Initialization
+			DlgText "sP0", 		str$(P0(1))
+			DlgText "sPmin", 	str$(P0(2))
+			DlgText "sPmax", 	str$(P0(3))
+			DlgText "stol", 	str$(tol)
+			DlgText "sdelp",	str$(delp)
+	End Select
+	
+	Select Case ID
+		Case "Start" 			' Update values entered by the user	
+			P0(1) = DlgText$("sP0")
+			P0(2) = DlgText$("sPmin")
+  			P0(3) = DlgText$("sPmax")
+			tol   = DlgText$("stol")
+			delp  = DlgText$("sdelp")
+		Case "Cancel"
+			End					' Stop Optimization
+		Case "Help"
+			' Should call DisplayHelp but you can't have 2 dialogs up together
+			' This is handled inside the calling function
+	End Select
+
+end Function
+
+
+Sub cmdOptimize (Document as WMDocument, P0() as double)
+
+	'Optimize runs the optimization
+
+	Dim foo as integer, iter as integer
+
+	Cost0 = cost(Document, P0(1))
+	iter = 0
+	' Find a range encompassing the optimal, return in PFinal(1)&(2), with CostFinal()
+	' containing the corresponding costs
+	FindRange Document, P0(), Cost0, PFinal(), CostFinal()	 
+	' Use a golden search algorithm to find the optimal parameter and relative cost
+	GoldenSearch Document, PFinal(), CostFinal()
+
+    ' Display values in a dialog
+	Begin Dialog FinalDialog ,,264,96,"Optimize - Results",.FinalCallBack
+		OKButton 208,8,40,14
+		Text 8,8,64,8,"Final Param. Value:",.Text1
+		Text 8,56,48,8,"Final Cost:",.Text2
+		Text 8,24,68,8,"Initial Param. Value:",.Text3
+		Text 8,40,48,8,"Initial Cost:",.Text4
+		Text 8,72,32,8,"Iterations:",.Text5
+		Text 84,8,100,8,"Text",.sPFinal
+		Text 84,56,100,8,"sCostFinal",.sCostFinal
+		Text 84,72,100,8,"siter",.siter
+		Text 84,24,100,8,".sP0",.sP0
+		Text 84,40,100,8,".sCost0",.sCost0
+	End Dialog
+	Dim Final as FinalDialog
+	If not(silent) then
+		dialog Final
+	End If
+
+End Sub
+
+Function FinalCallBack (ID as string, Action as integer, SuppValue as integer)
+
+	DebugPrint "In callback, action: "+str$(action)+" ID"+ID
+	Select Case Action
+		Case 1 					' Initialization
+			DlgText "sPFinal", 		Cstr(PFinal(1))
+			DlgText "sCostFinal", 	Cstr(CostFinal(1))
+			DlgText "sP0", 			Cstr(P0(1))
+			DlgText "sCost0", 		Cstr(Cost0)
+			DlgText "siter",		Cstr(iter)
+	End Select
+	
+
+end Function
+
+
+Sub FindRange(Doc as WMDocument, P0() as Double, Cost0 as Double, ByRef PB() as Double, ByRef CostB() as Double)
+
+	' FindRange identifies a range containing the optimal parameter
+	' It starts with P0 as the initial guess, it looks at the gradient at P0
+	' and figures out a descent direction.  Then it keeps moving in that direction
+	' using Cost/Gradient (newton step), until it finds a parameter value where the
+	' gradient as changed value (guaranteeing a minimum between PB(1) and PB(2))
+
+    Dim pBDelta As Double, CostDelta As Double
+    Dim Grad1 As Double, Grad2 As Double
+	Dim Temp as Double, delta as double
+
+    ' Initialize values
+	PB(1) = P0(1)
+	DebugPrint "Initial PB(1): "+str$(pB(1))
+	CostB(1) = Cost0
+	DebugPrint "Initial Cost1: "+str$(CostB(1))
+    ' Used to perturb the parameter to calculate a local gradient
+    delta = delp*abs(PB(1))
+	pBDelta = pB(1)+delta
+	If pBDelta>P0(3) then		' Going above upper bound
+		PB(2) = P0(3)			' Set PB(2) to upper bound
+		CostB(2) = Cost(Doc, PB(2))
+		Goto ExitSub
+	end If
+	CostDelta = Cost(Doc, pBDelta)
+	DebugPrint "Initial PBdelta: "+str$(pBdelta)
+	' Keep doubling delta until Gradient<>0
+	While Abs(CostDelta-CostB(1))<tiny 
+		DebugPrint "Small change: "+str$(Abs(CostDelta-CostB(1)))
+		delta = delta*2	: pBDelta = pB(1)+delta
+		If pBDelta>P0(3) then		' Going above upper bound
+			PB(2) = P0(3)			' Set PB(2) to upper bound
+			CostB(2) = Cost(Doc, PB(2))
+			Goto ExitSub
+		end If
+		DebugPrint "New delta: "+str$(delta)
+		CostDelta = Cost(Doc, pBDelta)
+	WEnd	
+	DebugPrint "Initial CostDelta: "+str$(CostDelta)
+    Grad1 = (CostDelta - CostB(1)) / delta
+	pB(2) = pB(1)
+	CostB(2) = CostB(1)
+	Grad2 = Grad1
+	While sgn(Grad2)=Sgn(Grad1)
+		pB(1) = pB(2) : CostB(1) = CostB(2)
+		DebugPrint "PB(1): "+str$(pB(1))
+		Temp = CostB(2) / Grad2
+		' Make sure the step doesn't get too small, at least 1/5 of pB(1)
+		If abs(Temp)<abs(pB(1)/5) then
+			Temp = sgn(Temp)*abs(pB(1)/5)
+		end If
+       	pB(2) = pB(2) - Temp
+		If pB(2)>P0(3) then			' Going above upper bound
+			PB(2) = P0(3)			' Set PB(2) to upper bound
+			CostB(2) = Cost(Doc, PB(2))
+			Goto ExitSub
+		ElseIf pB(2)<P0(2) then	' Going below lower bound
+			PB(2) = P0(2)			' Set PB(2) to lower bound
+			CostB(2) = Cost(Doc, PB(2))
+			Goto ExitSub
+		End If
+		DebugPrint "PB(2): "+str$(pB(2))
+		CostB(2) = Cost(Doc,pB(2))
+		DebugPrint "Cost2: "+str$(CostB(2))
+		delta = delp*abs(PB(2))
+        pBDelta=pB(2)+delta
+		If pBDelta>P0(3) then			' Going above upper bound
+			PB(2) = P0(3)			' Set PB(2) to upper bound
+			CostB(2) = Cost(Doc, PB(2))
+			Goto ExitSub
+		ElseIf pBDelta<P0(2) then	' Going below lower bound
+			PB(2) = P0(2)			' Set PB(2) to lower bound
+			CostB(2) = Cost(Doc, PB(2))
+			Goto ExitSub
+		end If
+		CostDelta = Cost(Doc, pBDelta)
+		' Keep doubling delta until Gradient<>0
+		Do While Abs(CostDelta-CostB(2))<tiny 
+			delta = delta*2	: pBDelta=pB(2)+delta*abs(pB(2))
+			If pBDelta>P0(3) then			' Going above upper bound
+				PB(2) = P0(3)			' Set PB(2) to upper bound
+				CostB(2) = Cost(Doc, PB(2))
+				Goto ExitSub
+			ElseIf pBDelta<P0(2) then	' Going below lower bound
+				PB(2) = P0(2)			' Set PB(2) to lower bound
+				CostB(2) = Cost(Doc, PB(2))
+				Goto ExitSub
+			end If
+			CostDelta = Cost(Doc, pBDelta)
+		Loop	
+        Grad2 = (CostDelta - CostB(2)) / delta
+	WEnd
+ExitSub:
+	If pB(2)<pB(1) then	 ' Switch them around
+		temp = pB(2)
+		pB(2) = pB(1)
+		pB(1) = temp
+		temp = CostB(2)
+		CostB(2) = CostB(1)
+		CostB(1) = temp
+	End If
+	DebugPrint "PB(1) final: "+str$(pB(1))
+	DebugPrint "Cost(1) final: "+str$(CostB(1))
+	DebugPrint "PB(2) final: "+str$(pB(2))
+	DebugPrint "Cost(2) final: "+str$(CostB(2))
+End Sub
+
+Sub GoldenSearch(Doc as WMDocument, ByRef PB() as Double, ByRef CostB() as Double)
+
+	' GoldenSearch, given a range of PB values, will use a Golden Search algorithm to
+	' find the optimal value.  It takes the interval, and evaluates the cost twice more
+	' inside the interval, keeping 3 of the 4 value, then iterates until the cost is no
+	' longer changing a lot.
+
+	Dim Gap as double, P(4) as double, temp as double
+	Dim CostP(4) as Double
+
+	P(1) = PB(1): P(4) = PB(2) 
+	CostP(1) = CostB(1) : CostP(4) = CostB(2)
+
+	Do While Abs(CostP(4)-CostP(1))>tol*abs(CostP(1)) 	' termination condition
+		Gap = P(4) - P(1)
+		DebugPrint "Gap: "+str$(Gap)
+		If CostP(4)>CostP(1) then
+			P(4) = P(1) + 0.618*Gap
+			DebugPrint "P(4): "+str$(P(4))
+			CostP(4) = Cost(Doc,P(4))
+			DebugPrint "Cost4: "+str$(CostP(4))
+		Else	' CostP(1)>CostP(4)
+			P(1) = P(1) + 0.382*Gap
+			DebugPrint "P(1): "+str$(P(1))
+			CostP(1) = Cost(Doc,P(1))
+			DebugPrint "Cost1: "+str$(CostP(1))
+		End If
+	Loop
+	PB(1) = (P(1)+P(4))/2
+	CostB(1) = Cost(Doc,PB(1))
+End Sub
+
+Function Cost(ByVal Doc as WMDocument, Byval Parameters As Double) as Double
+
+	' Evaluates the cost function give the current Parameter value.
+    
+    Dim Fa As Double
+    Dim Fd As Double
+    Dim car As WMBody
+    Dim out1 As WMOutput
+    Dim toff As Double
+    Dim size As Double, xf As Double
+    Dim NInputs As Integer, foo as integer
+
+	iter = iter+1
+    toff = Parameters
+	Doc.input("P0").value = toff
+	Doc.reset
+	Doc.run
+    set out1 = Doc.Output("Cost")
+    Cost = out1.Column(1).Cell.Value
+	Doc.reset
+    
+End Function
+
+''*****************  UTILITIES *********************
+
+
+Sub DisplayHelp
+
+	' DisplayHelp displayes the help dialog
+	
+	Dim sHelp() as string
+	Begin Dialog HelpDialog ,,240,224,"Optimize Tool Help"
+		OKButton 90,204,40,14
+		ListBox 5,4,230,200,sHelp$,.sHelp
+	End Dialog
+	Dim temp as string
+	If ReadHelpFile(ScriptDir$+"optimize.whl", sHelp())=-1 then		' Cannot find help file
+  		Exit Sub
+	end If
+	Dim HelpD as HelpDialog
+	dialog HelpD
+
+End Sub
+
+Function ReadHelpFile(file as string,ByRef HelpString() as string) as integer
+
+	' Reads the helpfile.  Skips lines starting with // (a comment).
+	' Terminates when it finds [end]
+
+	Dim lines as integer, tempst as string
+	ReDim HelpString(FileLen(file))
+	If not fileexists(file) then
+		MsgBox "Cannot find help file "+file
+		ReadHelpFile = -1
+		Exit Function
+	End If
+	Open file for input As #3
+	lines = 0
+	Do
+		Input #3, tempst
+		If InStr(tempst,"//")=0 and InStr(tempst,"[end]")=0 then  	' valid line
+		  	HelpString(lines) = tempst
+			lines = lines+1
+		End	If
+	Loop Until InStr(tempst,"[end]")>0		' Help end encountered
+	ReDim Preserve HelpString(lines-1)		' Make HelpString only as big as needed
+	ReadHelpFile = lines
+	Close #3	
+End Function
+
+Sub CopyArray(A() As Double, B() As Double)
+
+	' CopyArray copies the contents of array B into array A
+
+    ' A = B
+    Dim i As Integer, SIZA As Integer, SIZB As Integer
+
+    SIZA = UBound(A)
+    SIZB = UBound(B)
+
+    If SIZA <> SIZB Then
+        MsgBox "INTERNAL ERROR: Mismatch sizes:  A=" & SIZA & " B=" & SIZB
+    Else
+        ReDim A(SIZB)
+        For i = 1 To SIZB
+            A(i) = B(i)
+        Next
+    End If
+End Sub
+
+Sub DebugPrint (Message as string)
+	If DEBUG>0 then
+		If Basic.OS = ebWin16 or Basic.OS = ebWIn32 then
+			If DEBUG=2 then
+		 		ViewportOpen
+				Print Message
+			elseIf DEBUG=1 then
+				Print #1,Message
+			end If
+		elseIf Basic.OS = ebMacintosh then
+			Print #1,Message
+		End If
+	End If
+End Sub
+
+Sub PrintMatrix(A() As Double)
+    
+    Dim x As Integer, y As Integer
+    Dim row As Integer, Column As Integer
+
+    row = UBound(A, 1)
+    debugPrint "row: " & row
+    Column = UBound(A, 2)
+    debugPrint "col: " & Column
+
+    For x = 1 To row
+        debugPrint "row " & x & ": " ';
+        For y = 1 To Column
+            debugPrint A(x, y) & "  " ';
+        Next
+        debugPrint ""
+    Next
+
+End Sub
+
+Sub PrintVector(V() As Double)
+    
+    Dim x As Integer
+
+    For x = 1 To UBound(V)
+        debugPrint V(x) & "  " ';
+    Next
+
+End Sub
+
+
+''*****************  *********************
+
+Sub Main ()
+	dim doc as wmdocument
+
+	WMDir = Basic.HomeDir$		' AppFilename$ not supported, hoping Basic will always reside with WM
+
+	' Initialize variables
+	iter = 0
+	If tol=0 then	' tol not passed in via RunMe, use default
+		tol = 0.001
+	end If
+	If delp=0 then	' delp not passed in via RunMe, use default
+		delp = 0.05
+	end If
+
+	If Basic.OS = ebWin16 or Basic.OS = ebWIn32 then		' running MS-Windows
+		os = "win"
+	elseIf Basic.OS = ebMacintosh then			   			' running Macintosh
+ 		os = "mac"
+	else 
+		If Msgbox("Unknown Operating System:  Continue Anyway?",1)=2 then	' Quit
+			End
+		End If
+	End If
+	If DEBUG>0 then
+		If os="win" then		' running MS-Windows
+			If DEBUG=2 then
+				ViewportClear 		' Clear debugging window
+			end If
+			Close #1
+			Open "debugout.txt" for output As #1		'Open debug output file
+			Print #1,"Start",Date$(),Time$()
+		elseIf os="mac" then			   			' running Macintosh
+			Close #1
+			Open "Debug Output" for output As #1		'Open debug output file
+			Print #1,"Start",Date$(),Time$()
+		End If
+	End If
+	
+	' Let the user choose a demo file
+	Begin Dialog OpeningDialog ,,120,72,"Optimize - Start"
+		PushButton 10,8,100,14,"Optimization Demo",.PushButton1
+		PushButton 10,30,100,14,"Optimize Current Model",.PushButton2
+		PushButton 45,52,30,14,"Stop",.PushButton3
+	End Dialog
+	Dim OpenD as OpeningDialog, status as integer, choice as string
+	status = dialog(OpenD)
+	If status = 1 then		' Demo files
+		Dim DemoList(1) as string
+   		DemoList(0) = "Automobile Travel"
+		DemoList(1) = "Damped Spring Mass"
+  		Begin Dialog DemoChoiceDialog ,,180,55,"Choose Optimization Demo"
+			OKButton 132,8,40,14
+			CancelButton 132,28,40,14
+			ListBox 12,8,108,40,DemoList$,.ListChoice
+		End Dialog
+		Dim  DemoD as DemoChoiceDialog
+		If not(silent) then
+			If dialog(DemoD)=0 then	' Cancel
+				End
+			End If
+		End If
+
+		If os="win" then
+			ScriptDir$ = WMDir$+"\scripts\krdemos\"
+			DebugPrint "Scripts dir:"+ScriptDir$
+		else				' macintosh
+			ScriptDir$ = WMDir$+":scripts:krdemos:"
+			DebugPrint "Scripts dir:"+ScriptDir$
+		end If
+
+
+		DebugPrint "Scripts dir:"+ScriptDir$
+		choice = DemoList$(DemoD.ListChoice)
+		Select Case choice
+			Case "Automobile Travel"
+				set doc=wm.open(ScriptDir$+"car.wm")
+			Case "Damped Spring Mass"
+				set doc=wm.open(ScriptDir$+"sprdamp.wm")
+		End Select
+	ElseIf status = 3 then 	' Quit
+		End
+	end If
+	
+	If wm.documents.count = 0 then	  	' No docs open
+		MsgBox "No documents open.  Please open a document to be optimized and run again."
+		End		' terminate the script
+	else
+		set doc = wm.activedocument
+	End If
+
+	' Figure out Number of parameters
+	Dim NInputs as integer, NOutputs as integer, foo as integer
+	NInputs = doc.inputs.count
+
+	' Make sure there are at least one input and one output
+    If NInputs < 1 Then
+        MsgBox "The document '" & Doc.Name & "' must have at least one input", 0
+        End
+    End If
+
+	NOutputs = doc.outputs.count
+    If NOutputs < 1 Then
+        MsgBox "The document '" & Doc.Name & "' must have at least one output", 0
+        End
+    End If
+
+	' Get initial guesses on parameter values (from input slider current value)
+    Dim i as integer, success as boolean
+	Dim inputi as wminput    
+	success = 0 		' This flag remembers whether there's an input named P0 in the document
+    For i = 1 To NInputs
+		set inputi = doc.inputs.item(i)
+		If strcomp(inputi.name,"P0",1)=0 then		' ="P0" case insensitive
+			If success then	   			' Input "P0" already encountered
+				MsgBox "Multiple inputs named P0. Please rename one of them"
+				End
+			else
+				If not(silent) then		' Initial value of parameter passed in
+        			P0(1) = inputi.value  	' Get initial guesses on parameter values (from input slider current value)
+				End If
+				P0(2) = inputi.min
+				P0(3) = inputi.max
+				success = true
+			End If
+		End If
+    Next i
+   	If not(success) then
+		MsgBox "There must be one input named P0"
+		End
+	End If
+
+	' Make sure there is a Meter named Cost
+	success = 0
+    For i = 1 To NOutputs
+		If strcomp(doc.outputs.item(i).name,"Cost",1)=0 then	' ="Cost" case insensitive
+			success = true
+		End If
+    Next i
+   	If not(success) then
+		MsgBox "There must be one meter named Cost"
+		End
+	End If
+		
+	' Put up Initial dialog
+	Begin Dialog StartDialog ,,164,112,"Optimize - Starting Values",.StartCallBack
+		PushButton 120,4,40,14,"Start",.Start
+		PushButton 120,24,40,14,"Cancel",.Cancel
+		PushButton 121,93,40,16,"Help",.Help
+		Text 8,16,48,8,"Starting value:",.Text2
+		TextBox 56,12,52,12,.sP0
+		GroupBox 4,0,108,68,"P0",.sP0name
+		Text 8,36,48,8,"Min. value:",.Text1
+		Text 8,56,48,8,"Max. value:",.Text3
+		TextBox 56,32,52,12,.sPmin
+		TextBox 56,52,52,12,.sPmax
+		Text 4,80,60,8,"Convergence tol.:",.Text4
+		TextBox 64,76,48,12,.stol
+		TextBox 64,96,48,12,.sdelp
+		Text 4,99,60,8,"Gradient delta:",.Text5
+	End Dialog
+	Dim start as StartDialog
+	If not(silent) then
+		Do
+			status = dialog(start)
+   			If status = 3 then	' Help
+				DisplayHelp		' This should be handled inside StartCallBack but we need to quit out of start before opening Help
+   			end If
+   		Loop Until status = 1	' Start
+	End If
+	If P0(3)<=P0(2) then
+	 	MsgBox "Minimum parameter value "+start.sPmin+" must be less than maximum "+start.sPmax+"."
+		End
+	End If
+	If P0(1)<P0(2) or P0(1)>P0(3) then
+		P0(1) = P0(2) + (P0(3)-P0(2))/2
+		If Msgbox("P0 must be between minimum and maximum values.  Setting P0 to "+str$(P0(1))+".",1) = 2 then
+			End
+		End If
+	End If
+	If P0(2) < inputi.min then
+	 	inputi.min = P0(2)		' The user chose a lower min value, need to update input
+	End If
+	If P0(3) > inputi.max then
+		inputi.max = P0(2)		' The user chose a lower min value, need to update input
+	End If
+	
+	If tol<=0 then
+		MsgBox "Convergence tolerance value must be greater than 0.  Using default value "+str$(tol)+"."
+		tol = 0.001				' default value
+	End If
+	If delp<=0 then
+		MsgBox "Gradient delta value must be greater than 0.  Using default value "+str$(delp)+"."
+		delp = 0.05				' default value
+	End If
+
+	cmdOptimize	doc, P0()
+
+End Sub
+
+Function RunMe(P as double, tol0 as double, delp0 as double)
+
+	' RunMe can be used to drive OPTIMIZE in batch mode, from another
+	' script.  Optimize.wbs would be loaded as a wmblibrary.
+
+	P0(1) = P
+	tol = tol0
+	delp = delp0
+
+	main
+	'#2 must be open already
+	print #2,"P0 ";P,"Pfinal ";PFinal(1),"CostFinal ";CostFinal(1),"Iterations ";iter
+
+End Function
+		

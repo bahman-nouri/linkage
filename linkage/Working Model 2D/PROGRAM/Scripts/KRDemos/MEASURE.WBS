@@ -1,0 +1,54 @@
+'
+'	Creates a meter to measure distance between two
+'	selected points
+'
+'	Copyright(C) 1995 Knowledge Revolution.  All rights reserved.
+'
+'	Author:		Ken Tokusei
+'	History:	14 Jun 1995	Created
+'
+Sub Main()
+	Dim D as WMDocument, M as WMOutput, P1 as WMPoint, P2 as WMPoint
+	Dim P3 as WMPoint
+	Set D = Wm.ActiveDocument
+	If D is Nothing then
+		MsgBox "No document is open", ebExclamation, "ERROR"
+		Exit Sub
+	End If
+
+	' Check to see if a valid number of points are selected.
+
+	Set P1 = D.Selection.Point(1)
+	Set P2 = D.Selection.Point(2)
+	Set P3 = D.Selection.Point(3)
+
+	' Make sure two points are selected.
+	If P2 is Nothing then
+		MsgBox "You need to select two points first.", ebExclamation, "ERROR"
+		Exit Sub
+	End If
+
+	' If P3 is not Nothing, the user has more than two points selected.
+	' Provide an option to continue if necessary, although s/he has no idea
+	' which pair of points are being used.
+
+	If P3 is not Nothing then
+		Code = MsgBox("More than three points are selected.  Continue?", _
+				ebOKCancel or ebExclamation, "WARNING")
+		if Code = ebCancel then
+			Exit Sub
+		End IF
+	End If
+	
+	' Create the meter measuring the distance b/w P1 and P2
+
+	Set M = D.NewOutput()
+	If M is Nothing then
+		MsgBox "Cannot create a meter", ebExclamation, "ERROR"
+		Exit Sub
+	End If
+	M.Name = "Distance b/w P"+str$(P1.ID)+" and P"+str$(P2.ID)
+	M.Column(1).Label = "Dist"
+	M.Column(1).Cell.Formula = "|point["+str$(P1.ID)+"].p-point["+str$(P2.ID)+"].p|"
+	M.Width = 170
+End Sub

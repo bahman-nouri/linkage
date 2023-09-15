@@ -1,0 +1,57 @@
+:Base DD.HLP
+:Title Script Editor Help
+1 How To
+2 Use The Application Window=Application_Window
+2 Use The Toolbar Tools=Toolbar_Tools
+1 Moving the Insertion Point
+2 Moving the Insertion Point to a Specified Line in Your Script=Moving_the_Insertion_Point_to_a_Specified_Line_in_Your_Script
+2 Moving the Insertion Point with the Mouse=Moving_the_Insertion_Point_with_the_Mouse
+2 Moving the Instruction Pointer to Another Line within a Subroutine=Moving_the_Instruction_Pointer_to_Another_Line_within_a_Subroutine
+1 Selecting Text
+2 Selecting Text with the Keyboard=Selecting_Text_with_the_Keyboard
+2 Selecting Text with the Mouse=Selecting_Text_with_the_Mouse
+2 Selecting an Entire Line=Selecting_an_Entire_Line
+1 Deleting, Cutting, Copying, and Pasting Text
+2 Deleting Text=Deleting_Text
+2 Cutting a Selection=Cutting_a_Selection
+2 Copying a Selection=Copying_a_Selection
+2 Pasting the Contents of the Clipboard into Your Script=Pasting_the_Contents_of_the_Clipboard_into_Your_Script
+1 Adding Comments to Your Script
+2 Adding a Full-Line Comment=Adding_a_Full_Line_Comment
+2 Adding a Comment at the End of a Line of Code=Adding_a_Comment_at_the_End_of_a_Line_of_Code
+1 Finding and Replacing Text
+2 Finding Specfied Text=Finding_Specfied_Text
+2 Replacing Specified Text=Replacing_Specified_Text
+1 Editing Dialog Box Templates
+2 Inserting a New Dialog Box Template into Your Script=Inserting_a_New_Dialog_Box_Template_into_Your_Script
+2 Editing an Existing Dialog Box Template in Your Script=Editing_an_Existing_Dialog_Box_Template_in_Your_Script
+1 Running, Pausing, and Stopping Your Script
+2 Running Your Script=Running_Your_Script
+2 Pausing an Executing Script=Pausing_an_Executing_Script
+2 Stopping an Executing Script=Stopping_an_Executing_Script
+1 Tracing Script Execution
+2 Stepping Through Your Script=Stepping_Through_Your_Script
+2 Displaying the Calls Dialog Box=Displaying_the_Calls_Dialog_Box
+2 Moving the Instruction Pointer to Another Line within a Subroutine=Moving_the_Instruction_Pointer_to_Another_Line_within_a_Subroutine
+1 Setting and Removing Breakpoints
+2 Starting Debugging Partway through a Script=Starting_Debugging_Partway_through_a_Script
+2 Continuing Debugging at a Line Outside the Current Subroutine=Continuing_Debugging_at_a_Line_Outside_the_Current_Subroutine
+2 Debugging Selected Portions of Your Script=Debugging_Selected_Portions_of_Your_Script
+2 Removing a Single Breakpoint Manually=Removing_a_Single_Breakpoint_Manually
+2 Removing All Breakpoints Manually=Removing_All_Breakpoints_Manually
+1 Working with Watch Variables
+2 Adding Watch Variables=Adding_Watch_Variables
+2 Selecting Variables on the Watch List=Selecting_Variables_on_the_Watch_List
+2 Deleting Watch Variables=Deleting_Watch_Variables
+2 Modifying the Value of Variables on the Watch Variable List=Modifying_the_Value_of_Variables_on_the_Watch_Variable_List
+1 Keyboard Shortcuts
+2 General Shortcuts=General_Shortcuts
+2 Navigating Shortcuts=Navigating_Shortcuts
+2 Editing Shortcuts=Editing_Shortcuts
+2 Debugging Shortcuts=Debugging_Shortcuts
+1 Menu Commands
+2 File Menu=File_Menu
+2 Edit Menu=Edit_Menu
+2 Run Menu=Run_Menu
+2 Debug Menu=Debug_Menu
+2 Help Menu=Help_Menu

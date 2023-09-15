@@ -1,0 +1,339 @@
+:Base WM.HLP
+1 Getting Started
+2 About the guide=ABOUT_THE_GUIDE
+2 Contents=Contents
+2 About the Workshop projects=ABOUT_THE_WORKSHOP_PROJECTS
+2 What's new with Working Model 2D 4.0=WHAT_S_NEW_WITH_WORKING_MODEL_4_0
+2 Workshop Projects
+3 Bouncing a Ball
+4 Overview: Bouncing a ball=OVERVIEW__BOUNCING_A_BALL
+4 Step 1: Create the ball and table=STEP_1__CREATE_THE_BALL_AND_TABLE
+4 Step 2: Change the model's appearance=STEP_2__CHANGE_THE_MODEL_S_APPEARANCE
+4 Step 3: Change the ball's properties=STEP_3__CHANGE_THE_BALL_S_PROPERTIES
+3 Swinging a Pendulum
+4 Overview: Swinging a pendulum=OVERVIEW__SWINGING_A_PENDULUM
+4 Step 1: Create a pendulum=STEP_1__CREATE_A_PENDULUM
+4 Step 2: Set tracking=STEP_2__SET_TRACKING
+4 Step 3: Add a time meter=STEP_3__ADD_A_TIME_METER
+3 Launching a Projectile
+4 Overview: Launching a projectile=OVERVIEW__LAUNCHING_A_PROJECTILE
+4 Step 1: Create a projectile and define the workspace=STEP_1__CREATE_A_PROJECTILE_AND_DEFINE_THE_WORKSPACE
+4 Step 2: Create and edit input controls=STEP_2__CREATE_AND_EDIT_INPUT_CONTROLS
+4 Step 3: Change the model's world=STEP_3__CHANGE_THE_MODEL_S_WORLD
+3 Controlling Collisions
+4 Overview: Controlling collisions=OVERVIEW__CONTROLLING_COLLISIONS
+4 Step 1: Create billiard balls and set the background=STEP_1__CREATE_BILLIARD_BALLS_AND_SET_THE_BACKGROUND
+4 Step 2: Add velocity vectors to the model=STEP_2__ADD_VELOCITY_VECTORS_TO_THE_MODEL
+4 Step 3: Add momentum meters to the model=STEP_3__ADD_MOMENTUM_METERS_TO_THE_MODEL
+3 Sliding Down an Incline
+4 Overview: Sliding down an incline=OVERVIEW__SLIDING_DOWN_AN_INCLINE
+4 Step 1: Create the box and incline=STEP_1__CREATE_THE_BOX_AND_INCLINE
+4 Step 2: Add vectors and edit mixed properties=STEP_2__ADD_VECTORS_AND_EDIT_MIXED_PROPERTIES
+4 Step 3: Measure the contact forces=STEP_3__MEASURE_THE_CONTACT_FORCES
+4 Step 4: Apply external forces=STEP_4__APPLY_EXTERNAL_FORCES
+3 Tossing a Ball
+4 Overview: Tossing a ball=OVERVIEW__TOSSING_A_BALL
+4 Step 1: Create a ball and set its initial velocity=STEP_1__CREATE_A_BALL_AND_SET_ITS_INITIAL_VELOCITY
+4 Step 2: Add a pause control to the model=STEP_2__ADD_A_PAUSE_CONTROL_TO_THE_MODEL
+4 Step 3: Add a graph to quantify motion=STEP_3__ADD_A_GRAPH_TO_QUANTIFY_MOTION
+1 Working with Bodies
+2 About bodies=ABOUT_BODIES
+2 Workshop Project: Bouncing a Ball
+3 Overview: Bouncing a ball=OVERVIEW__BOUNCING_A_BALL
+3 Step 1: Create the ball and table=STEP_1__CREATE_THE_BALL_AND_TABLE
+3 Step 2: Change the model's appearance=STEP_2__CHANGE_THE_MODEL_S_APPEARANCE
+3 Step 3: Change the ball's properties=STEP_3__CHANGE_THE_BALL_S_PROPERTIES
+2 How Do I...
+3 How do I create a body?=HOW_DO_I_CREATE_A_BODY_
+3 How do I change body properties?=HOW_DO_I_CHANGE_BODY_PROPERTIES_
+3 How do I change a body's appearance?=HOW_DO_I_CHANGE_A_BODY_S_APPEARANCE_
+3 How do I change a body's geometry?=HOW_DO_I_CHANGE_A_BODY_S_GEOMETRY_
+3 How do I rotate a body?=HOW_DO_I_ROTATE_A_BODY_
+3 How do I anchor a body?=HOW_DO_I_ANCHOR_A_BODY_
+3 How do I delete an anchor?=HOW_DO_I_DELETE_AN_ANCHOR_
+3 How do I change a body's COM?=HOW_DO_I_CHANGE_A_BODY_S_COM_
+3 How do I control collisions?=HOW_DO_I_CONTROL_COLLISIONS_
+2 Why Can't I...
+3 Why can't I select points in an object?=WHY_CAN_T_I_SELECT_POINTS_IN_AN_OBJECT_
+3 Why can't I highlight points?=WHY_CAN_T_I_HIGHLIGHT_POINTS_
+2 Definitions
+3 acceleration=ACCELERATION
+3 anchor=ANCHOR
+3 angular velocity=ANGULAR_VELOCITY
+3 Appearance window=APPEARANCE_WINDOW
+3 center of mass=CENTER_OF_MASS
+3 charge=CHARGE
+3 circle=CIRCLE
+3 COM=COM
+3 curved polygon=CURVED_POLYGON
+3 density=DENSITY
+3 elasticity=ELASTICITY
+3 energy=ENERGY
+3 friction=FRICTION
+3 geometric center=GEOMETRIC_CENTER
+3 Geometry window=GEOMETRY_WINDOW
+3 initial position/orientation=INITIAL_POSITION_ORIENTATION
+3 initial velocity=INITIAL_VELOCITY
+3 mass=MASS
+3 mass object=MASS_OBJECT
+3 material=MATERIAL
+3 moment=MOMENT
+3 momentum=MOMENTUM
+3 polygon=POLYGON
+3 Properties window=PROPERTIES_WINDOW
+3 rectangle=RECTANGLE
+3 square=SQUARE
+3 Toolbar=TOOLBAR
+3 velocity=VELOCITY
+3 weight=WEIGHT
+1 Working with Constraints
+2 About constraints=ABOUT_CONSTRAINTS
+2 Workshop Project: Swinging a Pendulum
+3 Overview: Swinging a pendulum=OVERVIEW__SWINGING_A_PENDULUM
+3 Step 1: Create a pendulum=STEP_1__CREATE_A_PENDULUM
+3 Step 2: Set tracking=STEP_2__SET_TRACKING
+3 Step 3: Add a time meter=STEP_3__ADD_A_TIME_METER
+2 How Do I...
+3 How do I create a constraint?=HOW_DO_I_CREATE_A_CONSTRAINT_
+3 How do I create a joint?=HOW_DO_I_CREATE_A_JOINT_
+3 How do I build a joint from separate pieces?=HOW_DO_I_BUILD_A_JOINT_FROM_SEPARATE_PIECES_
+3 How do I break a joint apart?=HOW_DO_I_BREAK_A_JOINT_APART_
+3 How do I create a pulley?=HOW_DO_I_CREATE_A_PULLEY_
+3 How do I create gears?=HOW_DO_I_CREATE_GEARS_
+3 How do I change constraint properties?=HOW_DO_I_CHANGE_CONSTRAINT_PROPERTIES_
+3 How do I delete a constraint?=HOW_DO_I_DELETE_A_CONSTRAINT_
+3 How do I hide a constraint?=HOW_DO_I_HIDE_A_CONSTRAINT_
+3 How do I find constraint connections?=HOW_DO_I_FIND_CONSTRAINT_CONNECTIONS_
+2 Why Can't I...
+3 Why can't I drag a point or a constraint?=WHY_CAN_T_I_DRAG_A_POINT_OR_A_CONSTRAINT_
+2 Definitions
+3 actuator=ACTUATOR
+3 Appearance window=APPEARANCE_WINDOW
+3 constraint=CONSTRAINT
+3 damped spring=DAMPED_SPRING
+3 damper=DAMPER
+3 force=FORCE
+3 gears=GEARS
+3 joint=JOINT
+3 motor=MOTOR
+3 pin joint=PIN_JOINT
+3 point=POINT
+3 Properties window=PROPERTIES_WINDOW
+3 pulley=PULLEY
+3 rigid joint=RIGID_JOINT
+3 rod=ROD
+3 rope=ROPE
+3 rotational damper=ROTATIONAL_DAMPER
+3 rotational spring=ROTATIONAL_SPRING
+3 separator=SEPARATOR
+3 slot=SLOT
+3 slot joint=SLOT_JOINT
+3 spring=SPRING
+3 Toolbar=TOOLBAR
+3 torque=TORQUE
+1 Using Forces and Vectors
+2 About forces and vectors=ABOUT_FORCES_AND_VECTORS
+2 Workshop Project: Sliding Down an Incline
+3 Overview: Sliding down an incline=OVERVIEW__SLIDING_DOWN_AN_INCLINE
+3 Step 1: Create the box and incline=STEP_1__CREATE_THE_BOX_AND_INCLINE
+3 Step 2: Add vectors and edit mixed properties=STEP_2__ADD_VECTORS_AND_EDIT_MIXED_PROPERTIES
+3 Step 3: Measure the contact forces=STEP_3__MEASURE_THE_CONTACT_FORCES
+3 Step 4: Apply external forces=STEP_4__APPLY_EXTERNAL_FORCES
+2 How Do I...
+3 How do I apply a force or torque?=HOW_DO_I_APPLY_A_FORCE_OR_TORQUE_
+3 How do I delete a force or torque?=HOW_DO_I_DELETE_A_FORCE_OR_TORQUE_
+3 How do I change a force or torque?=HOW_DO_I_CHANGE_A_FORCE_OR_TORQUE_
+3 How do I display vectors?=HOW_DO_I_DISPLAY_VECTORS_
+3 How do I turn off vectors?=HOW_DO_I_TURN_OFF_VECTORS_
+3 How do I adjust the length of vectors?=HOW_DO_I_ADJUST_THE_LENGTH_OF_VECTORS_
+3 How do I change how vectors look?=HOW_DO_I_CHANGE_HOW_VECTORS_LOOK_
+2 Definitions
+3 Appearance window=APPEARANCE_WINDOW
+3 force=FORCE
+3 Properties window=PROPERTIES_WINDOW
+3 Toolbar=TOOLBAR
+3 torque=TORQUE
+3 vector=VECTOR
+1 Defining Your Project's World
+2 About the World frame=ABOUT_THE_WORLD_FRAME
+2 Workshop Project: Launching a Projectile
+3 Overview: Launching a projectile=OVERVIEW__LAUNCHING_A_PROJECTILE
+3 Step 1: Create a projectile and define the workspace=STEP_1__CREATE_A_PROJECTILE_AND_DEFINE_THE_WORKSPACE
+3 Step 2: Create and edit input controls=STEP_2__CREATE_AND_EDIT_INPUT_CONTROLS
+3 Step 3: Change the model's world=STEP_3__CHANGE_THE_MODEL_S_WORLD
+2 How Do I...
+3 How do I change gravitational values?=HOW_DO_I_CHANGE_GRAVITATIONAL_VALUES_
+3 How do I change the air resistance?=HOW_DO_I_CHANGE_THE_AIR_RESISTANCE_
+3 How do I activate electrostatic effects?=HOW_DO_I_ACTIVATE_ELECTROSTATIC_EFFECTS_
+3 How do I change the force fields?=HOW_DO_I_CHANGE_THE_FORCE_FIELDS_
+2 Definitions
+3 air resistance=AIR_RESISTANCE
+3 charge=CHARGE
+3 reference frame=REFERENCE_FRAME
+3 tracking=TRACKING
+3 World frame=WORLD_FRAME
+1 Measuring Your Models
+2 About meters=ABOUT_METERS
+2 Workshop Project: Controlling Collisions
+3 Overview: Controlling collisions=OVERVIEW__CONTROLLING_COLLISIONS
+3 Step 1: Create billiard balls and set the background=STEP_1__CREATE_BILLIARD_BALLS_AND_SET_THE_BACKGROUND
+3 Step 2: Add velocity vectors to the model=STEP_2__ADD_VELOCITY_VECTORS_TO_THE_MODEL
+3 Step 3: Add momentum meters to the model=STEP_3__ADD_MOMENTUM_METERS_TO_THE_MODEL
+2 How Do I...
+3 How do I add a meter?=HOW_DO_I_ADD_A_METER_
+3 How do I modify a meter?=HOW_DO_I_MODIFY_A_METER_
+3 How do I change a graph's scale?=HOW_DO_I_CHANGE_A_GRAPH_S_SCALE_
+3 How do I export a meter's data?=HOW_DO_I_EXPORT_A_METER_S_DATA_
+2 Why Can't I...
+3 Why can't I drag a control or meter?=WHY_CAN_T_I_DRAG_A_CONTROL_OR_METER_
+2 Definitions
+3 Appearance window=APPEARANCE_WINDOW
+3 control=CONTROL
+3 layers=LAYERS
+3 meter=METER
+3 Properties window=PROPERTIES_WINDOW
+1 Running Simulations
+2 About simulations=ABOUT_SIMULATIONS
+2 How Do I...
+3 How do I control a simulation?=HOW_DO_I_CONTROL_A_SIMULATION_
+3 How do I use the tape player controls?=HOW_DO_I_USE_THE_TAPE_PLAYER_CONTROLS_
+3 How do I save a simulation?=HOW_DO_I_SAVE_A_SIMULATION_
+2 Definitions
+3 Play bar=PLAY_BAR
+3 script=SCRIPT
+3 simulation=SIMULATION
+3 simulation history=SIMULATION_HISTORY
+3 Toolbar=TOOLBAR
+2 Simulation Warnings
+3 Simulation Warnings=simulation_warnings
+3 High Accelerations=HIDP_HIGH_ACCELERATION_ALERT
+3 High Velocities=HIDP_HIGH_VELOCITY_ALERT
+3 Redundant Constraints=HIDP_REDUNDANT_CONSTRAINT_ALERT
+3 Inconsistent Constraints=HIDP_INCONSISTENT_CONSTRAINT_ALERT
+3 Initial Mass Overlap=HIDP_INITIAL_MASS_OVERLAP
+1 Enhancing Your Simulations
+2 About simulation enhancements=ABOUT_SIMULATION_ENHANCEMENTS
+2 Workshop Project: Tossing a Ball
+3 Overview: Tossing a ball=OVERVIEW__TOSSING_A_BALL
+3 Step 1: Create a ball and set its initial velocity=STEP_1__CREATE_A_BALL_AND_SET_ITS_INITIAL_VELOCITY
+3 Step 2: Add a pause control to the model=STEP_2__ADD_A_PAUSE_CONTROL_TO_THE_MODEL
+3 Step 3: Add a graph to quantify motion=STEP_3__ADD_A_GRAPH_TO_QUANTIFY_MOTION
+2 How Do I...
+3 How do I create a control?=HOW_DO_I_CREATE_A_CONTROL_
+3 How do I change a control's properties?=HOW_DO_I_CHANGE_A_CONTROL_S_PROPERTIES_
+3 How do I change a control's appearance?=HOW_DO_I_CHANGE_A_CONTROL_S_APPEARANCE_
+3 How do I import data for an input control?=HOW_DO_I_IMPORT_DATA_FOR_AN_INPUT_CONTROL_
+3 How do I add menu buttons?=HOW_DO_I_ADD_MENU_BUTTONS_
+3 How do I work with text?=HOW_DO_I_WORK_WITH_TEXT_
+3 How do I add pictures?=HOW_DO_I_ADD_PICTURES_
+3 How do I link multiple documents?=HOW_DO_I_LINK_MULTIPLE_DOCUMENTS_
+2 Why Can't I...
+3 Why can't I drag a control or meter?=WHY_CAN_T_I_DRAG_A_CONTROL_OR_METER_
+2 Definitions
+3 Appearance window=APPEARANCE_WINDOW
+3 control=CONTROL
+3 Coordinates bar=COORDINATES_BAR
+3 Properties window=PROPERTIES_WINDOW
+1 Tips for Advanced Users
+2 How do I avoid inconsistent initial velocities?=HOW_DO_I_AVOID_INCONSISTENT_INITIAL_VELOCITIES_
+2 How do I best use automatic features?=HOW_DO_I_BEST_USE_AUTOMATIC_FEATURES_
+2 How do I build and debug a complex model?=HOW_DO_I_BUILD_AND_DEBUG_A_COMPLEX_MODEL_
+2 How do I build complex objects?=HOW_DO_I_BUILD_COMPLEX_OBJECTS_
+2 How do I control a simulation's duration?=HOW_DO_I_CONTROL_A_SIMULATION_S_DURATION_
+2 How do I control WM from another application?=HOW_DO_I_CONTROL_WM_FROM_ANOTHER_APPLICATION_
+2 How do I determine the best time step?=HOW_DO_I_DETERMINE_THE_BEST_TIME_STEP_
+2 How do I make a simulation run faster?=HOW_DO_I_MAKE_A_SIMULATION_RUN_FASTER_
+2 How do I minimize collisions?=HOW_DO_I_MINIMIZE_COLLISIONS_
+2 How do I prevent objects from penetrating?=HOW_DO_I_PREVENT_OBJECTS_FROM_PENETRATING_
+2 How do I prevent rebounding inelastic collisions?=HOW_DO_I_PREVENT_REBOUNDING_INELASTIC_COLLISIONS_
+2 How do I prevent simulations from slowing down?=HOW_DO_I_PREVENT_SIMULATIONS_FROM_SLOWING_DOWN_
+2 How do I put a body directly on another?=HOW_DO_I_PUT_A_BODY_DIRECTLY_ON_ANOTHER_
+2 How do I put a point on the edge of an object?=HOW_DO_I_PUT_A_POINT_ON_THE_EDGE_OF_AN_OBJECT_
+2 How do I run a long simulation?=HOW_DO_I_RUN_A_LONG_SIMULATION_
+2 How do I run a simulation unattended?=HOW_DO_I_RUN_A_SIMULATION_UNATTENDED_
+2 How do I select connected objects?=HOW_DO_I_SELECT_CONNECTED_OBJECTS_
+2 How do I use formulas?=HOW_DO_I_USE_FORMULAS_
+1 Troubleshooting
+2 Why can't I select points in an object?=WHY_CAN_T_I_SELECT_POINTS_IN_AN_OBJECT_
+2 Why can't I highlight points?=WHY_CAN_T_I_HIGHLIGHT_POINTS_
+2 Why can't I drag a point or a constraint?=WHY_CAN_T_I_DRAG_A_POINT_OR_A_CONSTRAINT_
+2 Why can't I drag a control or meter?=WHY_CAN_T_I_DRAG_A_CONTROL_OR_METER_
+2 Simulation Warnings
+3 Simulation Warnings=simulation_warnings
+3 High Accelerations=HIDP_HIGH_ACCELERATION_ALERT
+3 High Velocities=HIDP_HIGH_VELOCITY_ALERT
+3 Redundant Constraints=HIDP_REDUNDANT_CONSTRAINT_ALERT
+3 Inconsistent Constraints=HIDP_INCONSISTENT_CONSTRAINT_ALERT
+3 Initial Mass Overlap=HIDP_INITIAL_MASS_OVERLAP
+1 Glossary
+2 Definitions
+3 acceleration=ACCELERATION
+3 actuator=ACTUATOR
+3 air resistance=AIR_RESISTANCE
+3 anchor=ANCHOR
+3 Appearance window=APPEARANCE_WINDOW
+3 center of mass=CENTER_OF_MASS
+3 charge=CHARGE
+3 COM=COM
+3 constraint=CONSTRAINT
+3 control=CONTROL
+3 Coordinates bar=COORDINATES_BAR
+3 damped spring=DAMPED_SPRING
+3 damper=DAMPER
+3 density=DENSITY
+3 elasticity=ELASTICITY
+3 elastic=ELASTIC
+3 electric charge=ELECTRIC_CHARGE
+3 force=FORCE
+3 force field=FORCE_FIELD
+3 friction=FRICTION
+3 gears=GEARS
+3 geometric center=GEOMETRIC_CENTER
+3 Geometry window=GEOMETRY_WINDOW
+3 inelastic=INELASTIC
+3 inertia=INERTIA
+3 initial position/orientation=INITIAL_POSITION_ORIENTATION
+3 initial velocity=INITIAL_VELOCITY
+3 joint=JOINT
+3 kinetic energy=KINETIC_ENERGY
+3 layers=LAYERS
+3 mass=MASS
+3 mass object=MASS_OBJECT
+3 material=MATERIAL
+3 menu button=MENU_BUTTON
+3 meter=METER
+3 moment=MOMENT
+3 momentum=MOMENTUM
+3 motor=MOTOR
+3 pin joint=PIN_JOINT
+3 Play bar=PLAY_BAR
+3 point=POINT
+3 polygon=POLYGON
+3 potential energy=POTENTIAL_ENERGY
+3 projectile=PROJECTILE
+3 Properties window=PROPERTIES_WINDOW
+3 pulley=PULLEY
+3 rectangle=RECTANGLE
+3 reference frame=REFERENCE_FRAME
+3 rigid joint=RIGID_JOINT
+3 rod=ROD
+3 rope=ROPE
+3 rotational damper=ROTATIONAL_DAMPER
+3 rotational spring=ROTATIONAL_SPRING
+3 Rotate tool=ROTATE_TOOL
+3 script=SCRIPT
+3 separator=SEPARATOR
+3 simulation=SIMULATION
+3 simulation history=SIMULATION_HISTORY
+3 slot=SLOT
+3 slot joint=SLOT_JOINT
+3 spring=SPRING
+3 square=SQUARE
+3 Text tool=TEXT_TOOL_
+3 Toolbar=TOOLBAR
+3 torque=TORQUE
+3 tracking=TRACKING
+3 vector=VECTOR
+3 velocity=VELOCITY
+3 weight=WEIGHT
+3 World frame=WORLD_FRAME

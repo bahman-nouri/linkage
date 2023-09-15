@@ -1,0 +1,1306 @@
+' ******************************************************************************
+' DOCINFO.WBS - WRITE SIMULATION INFORMATION TO A FILE
+'	
+'	This Working Model script writes prints simulation information from
+'	the active Working Model document to a user specified file.  Users
+'	can select what types of simulation entities to print from a dialog.
+'	A help dialog is displayed upon request.
+'
+' Version 1.0, Created by Knowledge Revolution
+' (C) Copyright Knowledge Revolution 1995   All Rights Reserved
+'
+' ******************************************************************************
+Dim MyDoc as WMDocument
+
+Const vernum as string = "1.0"
+
+Const BlankLine as string = " "
+Const UChar as string = "-"
+Const Spaces as string = "                    "
+Dim CRLF as string
+
+Dim vp as boolean
+Dim numdec as integer
+
+Dim Helpset as boolean
+Dim Cancelflag as boolean
+
+Public firstin as integer
+
+Public HeaderFlag as boolean
+Public UnitFlag as boolean
+Public EngineFlag as boolean
+Public BodyFlag as boolean
+Public PinFlag as boolean
+Public SpringFlag as boolean
+Public DamperFlag as boolean
+Public SpringDamperFlag as boolean
+Public RotSpringFlag as boolean
+Public RotDamperFlag as boolean
+Public RodRopeSepFlag as boolean
+Public LinearSlotFlag as boolean
+Public CurvedSlotFlag as boolean
+Public ForceFlag as boolean
+Public TorqueFlag as boolean
+Public MotorActuatorFlag as boolean
+Public PulleyFlag as boolean
+Public GearFlag as boolean
+Public PointFlag as boolean
+
+Function Strcell(x as wmcell, sigdigits as integer) as string
+'-------------------------------------------------------------------
+'	This function takes a WMCell and formats either a number or
+'	the WMCells equation to fit in a string sigdigits wide.
+'-------------------------------------------------------------------
+
+
+	dim temp1 as string
+	dim temp2 as string * 12
+
+	if x.formula <> "" then
+		if len(x.formula) > 11 then
+			strcell = "    equation"
+		else
+			strcell = " " + right(spaces + x.formula,11)
+		end if
+	else
+		temp1 = Format(x.value, "0." + string(sigdigits,"0")) 
+
+   		if len(temp1) > 10 then
+   			temp1 = "xxxxxxxxx"
+   		end if
+   	
+   		rset temp2 = temp1
+   		strcell = temp2
+	end if
+end function
+
+Function Strnum(x as double, sigdigits as integer) as string
+'-------------------------------------------------------------------
+'	This function formats a string from a number passed to it.  The 
+'	string is left justified, and will have sigdigits decimal places.
+'	If it the original is longer than 10, the string is returned as
+'	all XXXXXX.
+'-------------------------------------------------------------------
+
+ 	dim temp1 as string
+	dim temp2 as string * 12
+
+	temp1 = Format(x, "0." + string(sigdigits,"0")) 
+   	if len(temp1) > 10 then
+   		temp1 = "xxxxxxxxx"
+ 	end if
+  	
+  	rset temp2 = temp1
+   	Strnum = temp2
+end function
+
+function OpenPrintFile as boolean
+'-------------------------------------------------------------------
+'	This function opens a file or a viewport (Windows only) based
+'	upon a users input.  It returns a true if the file was opened
+'	successfully, false if not.
+'-------------------------------------------------------------------
+
+	Dim F as string
+
+	openprintfile = false
+
+	If Basic.OS = ebwin16 or Basic.OS = ebwin32 then	' Running windows
+		crlf = chr$(13) + chr$(10)
+		r%=answerbox("Dump to a viewport or to a file?", "ViewPort", "File", "Cancel")
+		if r = 1 then
+			ViewPortOpen
+			openprintfile = true
+			vp = true
+		else 
+			if r = 2 then
+   				F = SaveFileName$("Select/Create Output File","Text Files:*.TXT")
+   				If F<>"" then
+   					Open f for output as #1
+   					openprintfile = true
+					vp = false
+   				end if
+			end if
+		end if
+	elseIf Basic.OS = ebmacintosh then			' Running Macintosh
+		crlf = chr$(13)
+  		F = SaveFileName$("Select/Create Output File","TEXT")
+   		If F<>"" then
+   			Open f for output as #1
+   			openprintfile = true
+			vp = false
+   		end if
+	else							' Unknown OS
+		MsgBox "Running Unknown Operating System " + Basic.OS
+	end If
+
+end function
+	
+Sub P (l as string)
+'-------------------------------------------------------------------
+'	This subroutine takes the string L and writes it either to the
+'	Viewport (Windows only) or file #1, depending on what the user
+'	selected in the OpenPrintFile routine above.
+'-------------------------------------------------------------------
+
+	If VP then
+		Print l
+	else
+		Print #1, l
+	end if
+
+End sub
+
+Sub PrintHeader
+'-------------------------------------------------------------------
+'	Prints the file header
+'-------------------------------------------------------------------
+
+	p "Working Model Information Export Utility     version " + vernum
+	p "Date: " + Date$
+	p "Time: " + Time$
+	p "Working Model Version: "
+	p "Simulation File: " + Mydoc.name
+
+end sub
+
+Sub PrintUnits
+'-------------------------------------------------------------------
+'	Prints the Unit section of the file.
+'-------------------------------------------------------------------
+
+	dim l as string
+
+	p blankline
+	p blankline
+	p "Section:  Unit System"
+	p blankline
+	l = "Distance:   " + left(mydoc.distanceunit + spaces,16)
+	l = l + "   Energy:   " + left(mydoc.energyunit + spaces,16)
+	l = l + "   Force:   " + left(mydoc.forceunit + spaces,16)
+	l = l + "   Frequency:   " + left(mydoc.frequencyunit + spaces,16)
+	p l
+	l = "Mass:       " + left(mydoc.massunit + spaces,16)
+	l = l + "   Power:    " + left(mydoc.powerunit + spaces,16)
+	l = l + "   Time:    " + left(mydoc.timeunit + spaces,16)
+	l = l + "   Velocity:    " + left(mydoc.velocityunit + spaces,16)
+	p l
+
+end sub
+
+Sub PrintEngine
+'-------------------------------------------------------------------
+'	Prints the information on the simulation engine settings.
+'-------------------------------------------------------------------
+
+	dim l as string	
+
+	p blankline
+	p blankline
+	p "Section:  Integration Settings"
+	p blankline
+	p "                         Variable/       Animation    Overlap     Assembly                 Gravity"
+	p "Integrator                Fixed            Step        Error       Error       Gravity     Constant"
+	p string(118,uchar)
+	p blankline
+	l = left(mydoc.integrator + spaces, 23)
+	if mydoc.variableintegrationstep then
+		l = l + "  Variable   "
+	else
+		l = l + "   Fixed     "
+	end if
+	l = l + strnum(mydoc.animationstep,numdec)
+	l = l + strnum(mydoc.overlaperror,numdec)
+	l = l + strnum(mydoc.assemblyerror,numdec)
+	if mydoc.gravity = "none" then
+		l = l + "         None"
+	else
+		if mydoc.gravity = "linear" then
+			l = l + "        Linear" + strnum(mydoc.lineargravityconst,numdec)
+		else
+			l = l + "      Planetary" + strnum(mydoc.planetarygravityconst,numdec)
+		end if
+	end if
+	p l
+
+End sub
+
+Sub Printbodies
+'-------------------------------------------------------------------
+'	Prints information on the bodies in the simulation.  The routine
+'	first writes the section header, then loops through all bodies
+'	and writes information on each.  Circles, rectangles, and polygons
+'	have sections with slightly different formats.
+'-------------------------------------------------------------------
+
+	dim l as string
+	dim x as double
+	dim y as double
+	dim i1 as integer	
+
+	p blankline
+	p blankline
+	p "Section:  Bodies"
+	p blankline
+	p "Body      Name        Kind      Px/         Vx/         Mass/       Sfric/    Geometry"
+    p "                                Py/         Vy/         Area/       Kfric"
+    p "                                Pr          Vr          Density     COR"
+	p string(118,uchar)
+
+	for i = 1 to mydoc.bodies.count
+		p blankline
+ 		l = left("Body[" + cstr(Mydoc.bodies.item(i).id) + "]" + spaces,10)
+ 		l = l + left(mydoc.bodies.item(i).name + spaces,10) + "  "
+ 		l = l + left(mydoc.bodies.item(i).kind + spaces,4)
+ 		l = l + strcell(mydoc.bodies.item(i).px,numdec)
+ 		l = l + strcell(mydoc.bodies.item(i).vx,numdec)
+ 		l = l + strcell(mydoc.bodies.item(i).mass,numdec)
+ 		l = l + strcell(mydoc.bodies.item(i).staticfriction,numdec)
+		if mydoc.bodies.item(i).kind = "rectangle" then
+			l = l + "    Height: " + strcell(mydoc.bodies.item(i).height,numdec)
+		else
+			if mydoc.bodies.item(i).kind = "circle" then
+		 		l = l + "    Radius: " + strcell(mydoc.bodies.item(i).radius,numdec)
+			else
+				mydoc.bodies.item(i).getvertex 1,x,y
+			 	l = l + "    V1x:  " + strnum(x,numdec) + "  V1y:  " + strnum(y,numdec)
+			end if
+		end if
+		p l
+
+		l = string(26, " ")
+ 		l = l + strcell(mydoc.bodies.item(i).py,numdec)
+ 		l = l + strcell(mydoc.bodies.item(i).vy,numdec)
+ 		l = l + "        area"
+ 		l = l + strcell(mydoc.bodies.item(i).kineticfriction,numdec)
+		if mydoc.bodies.item(i).kind = "rectangle" then
+			l = l + "    Width:  " + strcell(mydoc.bodies.item(i).width,numdec)
+		else
+ 			if mydoc.bodies.item(i).kind = "polygon" then
+				mydoc.bodies.item(i).getvertex 2,x,y
+ 		  		l = l + "    V2x:  " + strnum(x,numdec) + "  V2y:  " + strnum(y,numdec)
+	   		end if
+		end if
+		p l
+
+		l = string(26, " ")
+ 		l = l + strcell(mydoc.bodies.item(i).pr,numdec)
+ 		l = l + strcell(mydoc.bodies.item(i).vr,numdec)
+ 		l = l + "     density"
+ 		l = l + strcell(mydoc.bodies.item(i).elasticity,numdec)
+		if mydoc.bodies.item(i).kind = "polygon" then
+			mydoc.bodies.item(i).getvertex 3,x,y
+ 		  	l = l + "    V3x:  " + strnum(x,numdec) + "  V3y:  " + strnum(y,numdec)
+	   	end if
+		p l	  
+
+		if mydoc.bodies.item(i).kind = "polygon" then
+			for i1 = 4 to mydoc.bodies.item(i).vertexcount
+				mydoc.bodies.item(i).getvertex i1,x,y
+	 		 	l = string(74," ")
+				l = l + left("    V" + cstr(i1) + "x:" + "          ",10)
+				l = l + strnum(x,numdec)
+				l = l +	left("  V" + cstr(i1) + "y:" + "          ",8)
+				l = l + strnum(y,numdec)
+				p l
+			next i1
+		end if
+			  
+	next i
+
+end sub
+
+sub PrintConstraints
+'-------------------------------------------------------------------
+'	Prints header information on the constraints in the simulation. 
+'	After formatting the header information, a constraint specific
+'	routine is called for each instance of the constraint type.  Each
+'	class of constraints has different properties, so each is 
+'	formatted and handled separately.
+'-------------------------------------------------------------------
+
+	if pinflag then
+		headflag = true
+		for i = 1 to mydoc.constraints.count
+			if mydoc.constraints.item(i).kind = "pin" then
+				if headflag then
+					p blankline
+  			 		p blankline
+ 			  		p "Section:  Pins"
+   	 				p blankline
+   	   				p "Constraint      Name         Kind      Body1/     Point1/       P1x/        P1y/        Active When"
+	  				p "                                       Body2      Point2        P2x         P2y"
+   	   				p string(118,uchar)
+					headflag = false
+				end if
+			 	formatpin mydoc.constraints.item(i)
+			end if
+		next i
+	end if
+
+	if springflag then
+		headflag = true
+		for i = 1 to mydoc.constraints.count
+			if mydoc.constraints.item(i).kind = "spring" then
+				if headflag then
+					p blankline
+  			 		p blankline
+ 			  		p "Section:  Springs"
+   	 				p blankline
+   	   				p "Constraint      Name         Body1/     Point1/       P1x/        P1y/        K/          Rlength/"
+	  				p "                             Body2      Point2        P2x         P2y         Exp         Clength      Active When"
+   	   				p string(118,uchar)
+					headflag = false
+				end if
+			 	formatspring mydoc.constraints.item(i)
+			end if
+		next i
+	end if
+
+	if damperflag then
+		headflag = true
+		for i = 1 to mydoc.constraints.count
+			if mydoc.constraints.item(i).kind = "damper" then
+				if headflag then
+					p blankline
+  			 		p blankline
+ 			  		p "Section:  Dampers"
+   	 				p blankline
+   	   				p "Constraint      Name         Body1/     Point1/       P1x/        P1y/        K/"
+	  				p "                             Body2      Point2        P2x         P2y         Exp          Active When"
+   	   				p string(118,uchar)
+					headflag = false
+				end if
+			 	formatspring mydoc.constraints.item(i)
+			end if
+		next i
+	end if
+
+	if springdamperflag then
+		headflag = true
+		for i = 1 to mydoc.constraints.count
+			if mydoc.constraints.item(i).kind = "springdamper" then
+				if headflag then
+					p blankline
+  			 		p blankline
+ 			  		p "Section:  Spring/Dampers"
+   	 				p blankline
+   	   				p "Constraint      Name         Body1/     Point1/       P1x/        P1y/        SK/         Rlength/"
+	  				p "                             Body2      Point2        P2x         P2y         DK          Clength      Active When"
+   	   				p string(118,uchar)
+					headflag = false
+				end if
+			 	formatspringdamper mydoc.constraints.item(i)
+			end if
+		next i
+	end if
+
+	if rotspringflag then
+		headflag = true
+		for i = 1 to mydoc.constraints.count
+			if mydoc.constraints.item(i).kind = "rotationalspring" then
+				if headflag then
+					p blankline
+  			 		p blankline
+ 			  		p "Section:  Rotational Springs"
+   	 				p blankline
+   	   				p "Constraint      Name         Body1/     Point1/       P1x/        P1y/        K/          Rotation/"
+	  				p "                             Body2      Point2        P2x         P2y         Exp         CRotation    Active When"
+   	   				p string(118,uchar)
+					headflag = false
+				end if
+			 	formatrspring mydoc.constraints.item(i)
+			end if
+		next i
+	end if
+
+	if rotdamperflag then
+		headflag = true
+		for i = 1 to mydoc.constraints.count
+			if mydoc.constraints.item(i).kind = "rotationaldamper" then
+				if headflag then
+					p blankline
+  			 		p blankline
+ 			  		p "Section:  Rotational Dampers"
+   	 				p blankline
+   	   				p "Constraint      Name         Body1/     Point1/       P1x/        P1y/        K/"
+	  				p "                             Body2      Point2        P2x         P2y         Exp         Active When"
+   	   				p string(118,uchar)
+					headflag = false
+				end if
+			 	formatrspring mydoc.constraints.item(i)
+			end if
+		next i
+	end if
+
+	if rodropesepflag then
+		headflag = true
+		for i = 1 to mydoc.constraints.count
+			if mydoc.constraints.item(i).kind = "rod" or _
+				mydoc.constraints.item(i).kind = "rope" or _
+				mydoc.constraints.item(i).kind = "separator" then
+				if headflag then
+					p blankline
+  			 		p blankline
+ 			  		p "Section:  Rods, Ropes, and Separators"
+   	 				p blankline
+   	   				p "Constraint      Name         Kind      Body1/     Point1/       P1x/        P1y/        Length/     Elasticity/"
+	  				p "                                       Body2      Point2        P2x         P2y         CLength     Active When"
+   	   				p string(118,uchar)
+					headflag = false
+				end if
+			 	formatrodropesep mydoc.constraints.item(i)
+			end if
+		next i
+	end if
+
+	if MotorActuatorFlag then
+		headflag = true
+		for i = 1 to mydoc.constraints.count
+			if mydoc.constraints.item(i).kind = "motor" or _
+				mydoc.constraints.item(i).kind = "actuator" then
+				if headflag then
+					p blankline
+  			 		p blankline
+ 			  		p "Section:  Motors and Actuators"
+   	 				p blankline
+   	   				p "Constraint      Name         Kind      Body1/     Point1/       P1x/        P1y/        Type/       Active When"
+	  				p "                                       Body2      Point2        P2x         P2y         Value"
+   	   				p string(118,uchar)
+					headflag = false
+				end if
+			 	formatmotact mydoc.constraints.item(i)
+			end if
+		next i
+	end if
+
+	if ForceFlag then
+		headflag = true
+		for i = 1 to mydoc.constraints.count
+			if mydoc.constraints.item(i).kind = "force" then
+				if headflag then
+					p blankline
+  			 		p blankline
+ 			  		p "Section:  Forces"
+   	 				p blankline
+   	   				p "Constraint      Name         Body1      Point1        P1x/        Fx/         Rotate       Active When"
+	  				p "                                                      P1y         Fy"        
+   	   				p string(118,uchar)
+					headflag = false
+				end if
+			 	formatforce mydoc.constraints.item(i)
+			end if
+		next i
+	end if
+
+	if TorqueFlag then
+		headflag = true
+		for i = 1 to mydoc.constraints.count
+			if mydoc.constraints.item(i).kind = "torque" then
+				if headflag then
+					p blankline
+  			 		p blankline
+ 			  		p "Section:  Torques"
+   	 				p blankline
+   	   				p "Constraint      Name         Body1      Point1        P1x         P1y         Torque       Active When"
+   	   				p string(118,uchar)
+					headflag = false
+				end if
+			 	formattorque mydoc.constraints.item(i)
+			end if
+		next i
+	end if
+
+	if curvedslotflag then
+		headflag = true
+		for i = 1 to mydoc.constraints.count
+			if mydoc.constraints.item(i).kind = "curvedslot" then
+				if headflag then
+					p blankline
+  			 		p blankline
+ 			  		p "Section:  Curved Slots"
+   	 				p blankline
+   	   				p "Constraint      Name         Kind      Body1/     Point1/       P1x/        P1y/         Active When"
+	  				p "                                       Body2      Point2        P2x         P2y          V1x:        V1Y:"
+   	   				p string(118,uchar)
+					headflag = false
+				end if
+			 	formatcurvedslot mydoc.constraints.item(i)
+			end if
+		next i
+	end if
+
+	if linearslotflag then
+		headflag = true
+		for i = 1 to mydoc.constraints.count
+			if mydoc.constraints.item(i).kind = "slot" then
+				if headflag then
+					p blankline
+  			 		p blankline
+ 			  		p "Section:  Linear Slots"
+   	 				p blankline
+   	   				p "Constraint      Name         Body1/     Point1/       P1x/        P1y/         R1/"
+	  				p "                             Body2      Point2        P2x         P2y          R2        Active When"
+   	   				p string(118,uchar)
+					headflag = false
+				end if
+			 	formatlinearslot mydoc.constraints.item(i)
+			end if
+		next i
+	end if
+
+	if pulleyflag then
+		headflag = true
+		for i = 1 to mydoc.constraints.count
+			if mydoc.constraints.item(i).kind = "pulley" then
+				if headflag then
+					p blankline
+  			 		p blankline
+ 			  		p "Section:  Pulleys"
+   	 				p blankline
+   	   				p "Constraint      Name         Point       Body        Px          Py          Active When"
+   	   				p string(118,uchar)										 
+					headflag = false
+				end if
+			 	formatpulley mydoc.constraints.item(i)
+			end if
+		next i
+	end if
+
+	if gearflag then
+		headflag = true
+		for i = 1 to mydoc.constraints.count
+			if mydoc.constraints.item(i).kind = "gear" then
+				if headflag then
+					p blankline
+  			 		p blankline
+ 			  		p "Section:  Gears"
+   	 				p blankline
+   	   				p "Constraint      Name        Ratio        RodActive   Body1/      Internal1/  Active When"
+   	   				p "                                                     Body2       Internal2"
+   	   				p string(118,uchar)										 
+					headflag = false
+				end if
+			 	formatgear mydoc.constraints.item(i)
+			end if
+		next i
+	end if
+
+end sub
+
+sub formatpin(pin as wmconstraint)
+'-------------------------------------------------------------------
+'	Formats and prints detail information on the pin passed to it.
+'-------------------------------------------------------------------
+	
+	dim l as string
+	
+	p blankline
+ 	l = left("Constraint[" + cstr(pin.id) + "]" + spaces,16)
+ 	l = l + left(pin.name + spaces,11) + "  "
+	l = l + left(pin.kind + spaces,9)
+	l = l + left("body[" + cstr(pin.point(1).body.id) + "]" + spaces,11)
+	l = l + left("point[" + cstr(pin.point(1).id) + "]" + spaces,9)
+	l = l + strcell(pin.point(1).px,numdec)
+	l = l + strcell(pin.point(1).py,numdec)
+	if pin.alwaysactive then
+		l = l + "      Always"
+	else
+		l = l + "      " + pin.activewhen.formula
+	end if
+	p l
+
+	l = string(38, " ") + left("body[" + cstr(pin.point(2).body.id) + "]" + spaces,11)
+	l = l + left("point[" + cstr(pin.point(2).id) + "]" + spaces,9)
+	l = l + strcell(pin.point(2).px,numdec)
+	l = l + strcell(pin.point(2).py,numdec)
+	p l
+	
+end sub
+
+sub formatspring(spring as wmconstraint)
+'-------------------------------------------------------------------
+'	Formats and prints detail information on the spring passed to it.
+'-------------------------------------------------------------------
+	
+	dim l as string
+	
+	p blankline
+ 	l = left("Constraint[" + cstr(spring.id) + "]" + spaces,16)
+ 	l = l + left(spring.name + spaces,11) + "  "
+	l = l + left("body[" + cstr(spring.point(1).body.id) + "]" + spaces,11)
+	l = l + left("point[" + cstr(spring.point(1).id) + "]" + spaces,9)
+	l = l + strcell(spring.point(1).px,numdec)
+	l = l + strcell(spring.point(1).py,numdec)
+	l = l + strcell(spring.k,numdec)
+	if spring.kind = "spring" then
+		l = l + strcell(spring.length,numdec)
+	end if
+	p l
+
+	l = string(29, " ") + left("body[" + cstr(spring.point(2).body.id) + "]" + spaces,11)
+	l = l + left("point[" + cstr(spring.point(2).id) + "]" + spaces,9)
+	l = l + strcell(spring.point(2).px,numdec)
+	l = l + strcell(spring.point(2).py,numdec)
+	l = l + right("        " + cstr(spring.exponent) + "    ", 12)
+	if spring.kind = "spring" then
+		l = l + strnum(spring.currentlength,numdec)
+	end if
+	if spring.alwaysactive then
+		l = l + "      Always"
+	else
+		l = l + "      " + spring.activewhen.formula
+	end if
+
+	p l
+	
+end sub
+
+sub formatspringdamper(sd as wmconstraint)
+'-------------------------------------------------------------------
+'	Formats and prints detail information on the springdamper 
+'	passed to it.
+'-------------------------------------------------------------------
+	
+	dim l as string
+	
+	p blankline
+ 	l = left("Constraint[" + cstr(sd.id) + "]" + spaces,16)
+ 	l = l + left(sd.name + spaces,11) + "  "
+	l = l + left("body[" + cstr(sd.point(1).body.id) + "]" + spaces,11)
+	l = l + left("point[" + cstr(sd.point(1).id) + "]" + spaces,9)
+	l = l + strcell(sd.point(1).px,numdec)
+	l = l + strcell(sd.point(1).py,numdec)
+	l = l + strcell(sd.k,numdec)
+	l = l + strcell(sd.length,numdec)
+	p l
+
+	l = string(29, " ") + left("body[" + cstr(sd.point(2).body.id) + "]" + spaces,11)
+	l = l + left("point[" + cstr(sd.point(2).id) + "]" + spaces,9)
+	l = l + strcell(sd.point(2).px,numdec)
+	l = l + strcell(sd.point(2).py,numdec)
+	l = l + strcell(sd.damperk,numdec)
+	l = l + strnum(sd.currentlength,numdec)
+	if sd.alwaysactive then
+		l = l + "      Always"
+	else
+		l = l + "      " + sd.activewhen.formula
+	end if
+
+	p l
+	
+end sub
+
+sub formatrspring(rs as wmconstraint)
+'-------------------------------------------------------------------
+'	Formats and prints detail information on the rotaional spring
+'	 passed to it.
+'-------------------------------------------------------------------
+	
+	dim l as string
+	
+	p blankline
+ 	l = left("Constraint[" + cstr(rs.id) + "]" + spaces,16)
+ 	l = l + left(rs.name + spaces,11) + "  "
+	l = l + left("body[" + cstr(rs.point(1).body.id) + "]" + spaces,11)
+	l = l + left("point[" + cstr(rs.point(1).id) + "]" + spaces,9)
+	l = l + strcell(rs.point(1).px,numdec)
+	l = l + strcell(rs.point(1).py,numdec)
+	l = l + strcell(rs.k,numdec)
+	if rs.kind = "rotationalspring" then
+		l = l + strcell(rs.rotation,numdec)
+	end if
+	p l
+
+	l = string(29, " ") + left("body[" + cstr(rs.point(2).body.id) + "]" + spaces,11)
+	l = l + left("point[" + cstr(rs.point(2).id) + "]" + spaces,9)
+	l = l + strcell(rs.point(2).px,numdec)
+	l = l + strcell(rs.point(2).py,numdec)
+	l = l + right("        " + cstr(rs.exponent) + "    ", 12)
+	if rs.kind = "rotationalspring" then
+		l = l + strnum(rs.currentrotation,numdec)
+	end if
+	if rs.alwaysactive then
+		l = l + "      Always"
+	else
+		l = l + "      " + rs.activewhen.formula
+	end if
+
+	p l
+	
+end sub
+
+sub formatrodropesep(rrs as wmconstraint)
+'-------------------------------------------------------------------
+'	Formats and prints detail information on the rods, ropes, and
+'	separators passed to it.
+'-------------------------------------------------------------------
+	
+	dim l as string
+	
+	p blankline
+ 	l = left("Constraint[" + cstr(rrs.id) + "]" + spaces,16)
+ 	l = l + left(rrs.name + spaces,11) + "  "
+	l = l + left(left(rrs.kind,8) + spaces,9)
+	l = l + left("body[" + cstr(rrs.point(1).body.id) + "]" + spaces,11)
+	l = l + left("point[" + cstr(rrs.point(1).id) + "]" + spaces,9)
+	l = l + strcell(rrs.point(1).px,numdec)
+	l = l + strcell(rrs.point(1).py,numdec)
+	l = l + strcell(rrs.length,numdec)
+	if rrs.kind = "rope" or rrs.kind = "separator" then
+		l = l + strcell(rrs.elasticity,numdec)
+	end if
+
+	p l
+
+	l = string(38, " ") + left("body[" + cstr(rrs.point(2).body.id) + "]" + spaces,11)
+	l = l + left("point[" + cstr(rrs.point(2).id) + "]" + spaces,9)
+	l = l + strcell(rrs.point(2).px,numdec)
+	l = l + strcell(rrs.point(2).py,numdec)
+	if rrs.kind = "rope" or rrs.kind = "separator" then
+		l = l + strnum(rrs.currentlength,numdec)
+	else
+		l = l + "            "
+	end if
+	if rrs.alwaysactive then
+		l = l + "      Always"
+	else
+		l = l + "      " + rrs.activewhen.formula
+	end if
+
+	p l
+	
+end sub
+
+sub formatmotact(ma as wmconstraint)
+'-------------------------------------------------------------------
+'	Formats and prints detail information on the motors and actuators
+' 	passed to it.
+'-------------------------------------------------------------------
+	
+	dim l as string
+	
+	p blankline
+ 	l = left("Constraint[" + cstr(ma.id) + "]" + spaces,16)
+ 	l = l + left(ma.name + spaces,11) + "  "
+	l = l + left(ma.kind + spaces,9)
+	l = l + left("body[" + cstr(ma.point(1).body.id) + "]" + spaces,11)
+	l = l + left("point[" + cstr(ma.point(1).id) + "]" + spaces,9)
+	l = l + strcell(ma.point(1).px,numdec)
+	l = l + strcell(ma.point(1).py,numdec)
+	if ma.kind = "motor" then
+		l = l + left("    " + ma.motortype + "     ",12)
+	else
+		l = l + left("    " + ma.actuatortype + "     ",12)
+	end if
+	if ma.alwaysactive then
+		l = l + "      Always"
+	else
+		l = l + "      " + ma.activewhen.formula
+	end if
+	p l
+
+	l = string(38, " ") + left("body[" + cstr(ma.point(2).body.id) + "]" + spaces,11)
+	l = l + left("point[" + cstr(ma.point(2).id) + "]" + spaces,9)
+	l = l + strcell(ma.point(2).px,numdec)
+	l = l + strcell(ma.point(2).py,numdec)
+	l = l + strcell(ma.field,numdec)
+	p l
+	
+end sub
+
+sub formatforce(force as wmconstraint)
+'-------------------------------------------------------------------
+'	Formats and prints detail information on the force passed to it.
+'-------------------------------------------------------------------
+	
+	dim l as string
+	
+	p blankline
+ 	l = left("Constraint[" + cstr(force.id) + "]" + spaces,16)
+ 	l = l + left(force.name + spaces,11) + "  "
+	l = l + left("body[" + cstr(force.point(1).body.id) + "]" + spaces,11)
+	l = l + left("point[" + cstr(force.point(1).id) + "]" + spaces,9)
+	l = l + strcell(force.point(1).px,numdec)
+	l = l + strcell(force.fx,numdec)
+	if force.rotatewithbody then
+		l = l + "     Yes    "
+	else
+		l = l + "     No     "
+	end if
+	if force.alwaysactive then
+		l = l + "      Always"
+	else
+		l = l + "      " + force.activewhen.formula
+	end if
+	p l
+
+	l = string(49," ")
+	l = l + strcell(force.point(1).py,numdec)
+	l = l + strcell(force.fy,numdec)
+	p l
+
+end sub
+
+sub formattorque(t as wmconstraint)
+'-------------------------------------------------------------------
+'	Formats and prints detail information on the torque passed to it.
+'-------------------------------------------------------------------
+	
+	dim l as string
+	
+	p blankline
+ 	l = left("Constraint[" + cstr(t.id) + "]" + spaces,16)
+ 	l = l + left(t.name + spaces,11) + "  "
+	l = l + left("body[" + cstr(t.point(1).body.id) + "]" + spaces,11)
+	l = l + left("point[" + cstr(t.point(1).id) + "]" + spaces,9)
+	l = l + strcell(t.point(1).px,numdec)
+	l = l + strcell(t.point(1).py,numdec)
+	l = l + strcell(t.torque,numdec)
+	if t.alwaysactive then
+		l = l + "      Always"
+	else
+		l = l + "      " + t.activewhen.formula
+	end if
+	p l
+
+end sub
+
+sub formatcurvedslot(cs as wmconstraint)
+'-------------------------------------------------------------------
+'	Formats and prints detail information on the curvedslot passed 
+'	to it.
+'-------------------------------------------------------------------
+	
+	dim l as string
+	dim i1 as integer
+	dim x as double
+	dim y as double
+	
+	p blankline
+ 	l = left("Constraint[" + cstr(cs.id) + "]" + spaces,16)
+ 	l = l + left(cs.name + spaces,11) + "  "
+	if not(cs.point(1) is nothing) then
+  		l = l + left("body[" + cstr(cs.point(1).body.id) + "]" + spaces,11)
+  		l = l + left("point[" + cstr(cs.point(1).id) + "]" + spaces,9)
+  		l = l + strcell(cs.point(1).px,numdec)
+  		l = l + strcell(cs.point(1).py,numdec)
+	else
+		l = string(75," ")
+	end if
+	if cs.alwaysactive then
+		l = l + "      Always"
+	else
+		l = l + "      " + cs.activewhen.formula
+	end if
+	p l
+
+	if not(cs.point(2) is nothing) then
+		l = string(39, " ") + left("body[" + cstr(cs.point(2).body.id) + "]" + spaces,11)
+   		l = l + left("point[" + cstr(cs.point(2).id) + "]" + spaces,9)
+   		l = l + strcell(cs.point(2).px,numdec)
+   		l = l + strcell(cs.point(2).py,numdec)
+	else
+		l = string(75," ")
+	end if
+
+	for i1 = 1 to cs.vertexcount
+		cs.getvertex i1,x,y
+ 	 	l = string(84," ")
+		l = l + strnum(x,numdec)
+		l = l + strnum(y,numdec)
+		p l
+	next i1
+	
+end sub
+
+sub formatlinearslot(ls as wmconstraint)
+'-------------------------------------------------------------------
+'	Formats and prints detail information on the linearslot passed 
+'	to it.
+'-------------------------------------------------------------------
+	
+	dim l as string
+	dim i1 as integer
+	
+	p blankline
+ 	l = left("Constraint[" + cstr(ls.id) + "]" + spaces,16)
+ 	l = l + left(ls.name + spaces,11) + "  "
+
+	if not(ls.point(1) is nothing) then
+  		l = l + left("body[" + cstr(ls.point(1).body.id) + "]" + spaces,11)
+  		l = l + left("point[" + cstr(ls.point(1).id) + "]" + spaces,9)
+  		l = l + strcell(ls.point(1).px,numdec)
+  		l = l + strcell(ls.point(1).py,numdec)
+		l = l + strcell(ls.point(1).pr,numdec)
+	else
+		l = string(75," ")
+	end if
+	if ls.alwaysactive then
+		l = l + "    Always"
+	else
+		l = l + "    " + ls.activewhen.formula
+	end if
+	p l
+
+	if not(ls.point(2) is nothing) then
+		l = string(29, " ") + left("body[" + cstr(ls.point(2).body.id) + "]" + spaces,11)
+   		l = l + left("point[" + cstr(ls.point(2).id) + "]" + spaces,9)
+   		l = l + strcell(ls.point(2).px,numdec)
+   		l = l + strcell(ls.point(2).py,numdec)
+		l = l + strcell(ls.point(2).pr,numdec)
+	else
+		l = string(75," ")
+	end if
+	p l
+	
+end sub
+
+sub formatpulley(pulley as wmconstraint)
+'-------------------------------------------------------------------
+'	Formats and prints detail information on the pulley passed to it.
+'-------------------------------------------------------------------
+	
+	dim l as string
+	dim i1 as integer
+	
+	p blankline
+ 	l = left("Constraint[" + cstr(pulley.id) + "]" + spaces,16)
+ 	l = l + left(pulley.name + spaces,10) + "   "
+  	l = l + left("point[" + cstr(pulley.point(1).id) + "]" + spaces,11)
+  	l = l + left("body[" + cstr(pulley.point(1).body.id) + "]" + spaces,9)
+  	l = l + strcell(pulley.point(1).px,numdec)
+  	l = l + strcell(pulley.point(1).py,numdec)
+	if pulley.alwaysactive then
+		l = l + "    Always"
+	else
+		l = l + "    " + pulley.activewhen.formula
+	end if
+	p l
+
+	for i1 = 2 to pulley.pointcount
+  		l = string(29," ")
+   		l = l + left("point[" + cstr(pulley.point(i1).id) + "]" + spaces,11)
+   		l = l + left("body[" + cstr(pulley.point(i1).body.id) + "]" + spaces,9)
+   		l = l + strcell(pulley.point(i1).px,numdec)
+   		l = l + strcell(pulley.point(i1).py,numdec)
+		p l
+	next i1
+	
+end sub
+
+sub formatgear(gear as wmconstraint)
+'-------------------------------------------------------------------
+'	Formats and prints detail information on the gear passed to it.
+'-------------------------------------------------------------------
+	
+	dim l as string
+	
+	p blankline
+ 	l = left("Constraint[" + cstr(gear.id) + "]" + spaces,16)
+ 	l = l + left(gear.name + spaces,9) + " "
+	l = l + strcell(gear.gearratio,numdec)
+	if gear.rodactive.value = 1 then
+		l = l + "   Active      "
+	else
+		l = l + " Not Active    "
+	end if
+	l = l + left("body[" + cstr(gear.point(1).body.id) + "]" + spaces,11)
+	if gear.internal then
+		if gear.internalbody = gear.point(1).body.id then
+			l = l + " Yes    "
+		else
+	   		l = l + " No     "
+		end if
+	else
+		l = l + " No     "
+ 	end if
+	if gear.alwaysactive then
+		l = l + "     Always"
+	else
+		l = l + "     " + gear.activewhen.formula
+	end if
+	p l
+
+	l = string(53, " ")
+	l = l + left("body[" + cstr(gear.point(2).body.id) + "]" + spaces,11)
+	if gear.internal then
+		if gear.internalbody = gear.point(2).body.id then
+			l = l + " Yes     "
+		else
+	   		l = l + " No      "
+		end if
+	else
+		l = l + " No      "
+ 	end if
+
+	p l
+	
+end sub
+
+sub PrintPoints
+'-------------------------------------------------------------------
+'	Formats and prints detail information on the point passed to it.
+'-------------------------------------------------------------------
+
+	dim l as string
+
+	p blankline
+	p blankline
+	p "Section:  Round and Square Points"
+	p blankline
+	p "Point      Name        Body        Px          Py          Constraint"
+	p string(118,uchar)										 
+
+	for i = 1 to mydoc.points.count
+   		p blankline
+ 		l = left("Point[" + cstr(mydoc.points.item(i).id) + "]" + spaces,11)
+ 		l = l + left(mydoc.points.item(i).name + spaces,11) + " "
+ 	 	l = l + left("body[" + cstr(mydoc.points.item(i).body.id) + "]" + spaces,9)
+ 	 	l = l + strcell(mydoc.points.item(i).px,numdec)
+ 	 	l = l + strcell(mydoc.points.item(i).py,numdec)
+ 		if not(mydoc.points.item(i).Constraint is nothing) then
+ 			l = l + right(spaces + "constraint[" + cstr(mydoc.points.item(i).constraint.id) + "]",16)
+  		end if
+		p l
+	next i
+
+end sub
+
+sub displayhelp
+'-------------------------------------------------------------------
+'	Displays the help dialog box.
+'-------------------------------------------------------------------
+
+	msgbox "This Working Model Tool writes a file of simulation data" + crlf + _
+           "for the active Working Model document.  Users can select" + crlf + _
+           "what simulation entities to print, and specify the file"  + crlf + _
+           "where the information will be placed." + crlf + crlf + _
+           "A word processor (or Write, which is shipped with Windows)" + crlf + _
+           "can be used to print the file.  To set up the file for" + crlf + _
+           "printing from within a word processor, follow these steps:" + crlf + crlf + _
+           "     1. Open the file from within your word processor" + crlf + _
+           "     2. Select the entire document" + crlf + _
+           "     3. Change the font to <Courier>" + crlf + _
+           "     4. Change the document margins to 0.5 inches on all sides" + crlf + _
+           "     5. Choose landscape mode in the print setup dialog" + crlf + _
+           "     6. Print the document" + crlf + crlf, , "Document Model Help"
+
+           
+	helpset = false
+end sub
+
+Function UserAction(ID$, Action%, SuppVal%)
+'-------------------------------------------------------------------
+'	Fills in the main dialog box.  When this routine is first run, 
+'	all selection boxes are checked.  If the user deselects any
+'	boxes, these are retained during subsequent.
+'-------------------------------------------------------------------
+
+	dim i as integer
+ 
+ 	Select case Action
+ 	
+ 	Case 1				' Dialog box initializes
+
+		if firstin = 0 then			   ' first time running routine
+			DlgValue "header", 1
+			DlgValue "units", 1
+			DlgValue "engine", 1
+			DlgValue "body", 1
+			DlgValue "pins", 1
+			DlgValue "springs", 1
+			DlgValue "dampers", 1
+			DlgValue "springdampers", 1
+			DlgValue "rotsprings", 1
+			DlgValue "rodsropesep", 1
+			DlgValue "motorsactuators", 1
+			DlgValue "force", 1
+			DlgValue "torques", 1
+			DlgValue "linearslot", 1
+			DlgValue "curvedslot", 1
+			DlgValue "pulleys", 1
+			DlgValue "gears", 1
+			DlgValue "points", 1
+			firstin = 5
+		else
+			DlgValue "header", headerflag
+			DlgValue "units", Unitflag
+			DlgValue "engine", engineflag
+			DlgValue "body", bodyflag
+			DlgValue "pins", pinflag
+			DlgValue "springs", springflag
+			DlgValue "dampers", damperFlag
+			DlgValue "springdampers", SpringDamperFlag
+			DlgValue "rotsprings", RotSpringFlag
+			DlgValue "rodsropesep", RodRopeSepFlag
+			DlgValue "motorsactuators", MotorActuatorFlag
+			DlgValue "force", ForceFlag
+			DlgValue "torques", TorqueFlag
+			DlgValue "linearslot", LinearSlotFlag
+			DlgValue "curvedslot", CurvedSlotFlag
+			DlgValue "pulleys", PulleyFlag
+			DlgValue "gears", GearFlag
+			DlgValue "points", PointFlag
+		end if
+
+ 	Case 2		  		' User selects a dialog option
+		
+  		headerflag = dlgValue("header")
+  		Unitflag = dlgValue("units")
+  		Engineflag = dlgValue("engine")
+  		Bodyflag = dlgValue("body")
+  		pinflag = dlgValue("pins")
+  		springflag = dlgValue("springs")
+		damperflag = dlgValue("dampers")
+		SpringDamperFlag = dlgvalue("springdampers")
+		RotSpringFlag = dlgvalue("rotsprings")
+		rodropesepflag = dlgvalue("rodsropesep")
+		MotorActuatorFlag = dlgvalue("motorsactuators")
+		ForceFlag = dlgvalue("force")
+		TorqueFlag = dlgvalue("torques")
+		LinearSlotFlag = dlgvalue("linearslot")
+		CurvedSlotFlag = dlgvalue("curvedslot")
+		PulleyFlag = dlgvalue("pulleys")
+		GearFlag = dlgvalue("gears")
+		pointflag = dlgvalue("points")
+
+  	Case Else
+  	End Select
+
+end function
+
+
+sub GetPrintParms
+'-------------------------------------------------------------------
+'	Formats the main dialog box.  Calls useraction whenever the user
+'	types or enters anything into the dialog box.
+'-------------------------------------------------------------------
+
+Begin Dialog PDTemplate 91,22,205,186,"Write Simulation Information",.useraction
+	OKButton 159,8,40,14
+	CancelButton 159,28,40,14
+	CheckBox 10,16,80,8,"Header",.header
+	CheckBox 10,26,80,8,"Unit System",.Units
+	CheckBox 10,36,80,8,"Engine/Integrator",.engine
+	CheckBox 10,63,110,8,"Rectangles, Circles, Polygons",.body
+	Text 5,4,77,8,"Header Information",.Text1
+	Text 5,51,77,8,"Body Information",.Text2
+	CheckBox 10,89,80,8,"Pin Joints",.pins
+	CheckBox 10,99,80,8,"Springs",.springs
+	Text 5,78,77,8,"Constraint Information",.Text3
+	CheckBox 10,109,80,8,"Dampers",.dampers
+	CheckBox 10,119,80,8,"Springs/Dampers",.springdampers
+	CheckBox 10,129,80,8,"Rotational Springs",.rotsprings
+	CheckBox 10,139,94,8,"Rods, Ropes, Separators",.rodsropesep
+	CheckBox 10,149,94,8,"Motors, Actuators",.motorsactuators
+	CheckBox 114,89,82,8,"Forces",.force
+	CheckBox 114,99,82,8,"Torques",.torques
+	CheckBox 114,109,82,8,"Linear Slots",.linearslot
+	CheckBox 114,129,82,8,"Pulleys",.pulleys
+	CheckBox 114,139,82,8,"Gears",.gears
+	PushButton 159,48,40,14,"Help",.help
+	CheckBox 114,119,82,8,"Curved Slots",.curvedslot
+	Text 5,163,77,8,"Pin Information",.Text4
+	CheckBox 10,173,110,8,"Round and Square Points",.points
+End Dialog
+
+	Dim PD as PDTemplate
+
+	r% = Dialog(PD,1,0)
+
+	If r% = 1 then
+		helpset = true
+	else
+		If r% = -1 then
+  			helpset = false
+		else
+			helpset = false
+			cancelflag = true
+		end if
+	end if
+
+end sub
+
+sub main
+'-------------------------------------------------------------------
+'	Routine that controls program flow.  First asks user for a file
+'	where data can be placed.  On Mac, this must be a filename.  On
+'	Windows, this can be either a file or the ViewPort.
+'	
+'	This routine then displays the main dialog box, displaying the 
+'	help dialog box if the user asks for it.
+'
+'	When the user selects OK, this routine then calls the subroutines
+'	that do printing for each type of Working Model entity the user
+'	requested printing for.  	
+'-------------------------------------------------------------------
+
+
+	set mydoc = wm.activedocument
+
+	if (mydoc is Nothing) then
+		MsgBox "No active document exists.", ebExclamation, "Document Model"
+		Exit Sub
+	end if
+
+	numdec = mydoc.decimaldigits
+	helpset = false
+	cancelflag = false
+
+	If Basic.OS = ebwin16 or Basic.OS = ebwin32 then	' Running windows
+		crlf = chr$(13) + chr$(10)
+	else
+		If Basic.OS = ebmacintosh then			' Running Macintosh
+	   		crlf = chr$(13)
+   		else							' Unknown OS
+   			MsgBox "Running Unknown Operating System "+Basic.OS
+			exit sub
+   		end If
+	end if
+
+	GetPrintParms
+
+	If cancelflag then
+		exit sub
+	end if	
+
+	while helpset
+		displayhelp
+		GetPrintParms
+	wend
+
+	If cancelflag then
+		exit sub
+	end if	
+
+	if not openprintfile then
+		exit sub
+	end if
+
+	If HeaderFlag then
+		PrintHeader
+	End if
+
+	If UnitFlag then
+		PrintUnits
+	End if
+
+	if EngineFlag then
+		PrintEngine
+	End if
+
+	If BodyFlag and (Mydoc.Bodies.count > 0) then
+		PrintBodies
+	End if
+
+	If Mydoc.constraints.count > 0 then
+		Printconstraints
+	End if
+
+	if PointFlag and (Mydoc.points.count > 0) then
+		PrintPoints
+	End if
+
+End Sub

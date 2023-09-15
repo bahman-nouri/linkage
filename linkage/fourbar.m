@@ -1,0 +1,1048 @@
+function varargout = fourbar(varargin)
+% FOURBAR M-file for fourbar.fig
+%      FOURBAR, by itself, creates a new FOURBAR or raises the existing
+%      singleton*.
+%
+%      H = FOURBAR returns the handle to a new FOURBAR or the handle to
+%      the existing singleton*.
+%
+%      FOURBAR('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in FOURBAR.M with the given input arguments.
+%
+%      FOURBAR('Property','Value',...) creates a new FOURBAR or raises the
+%      existing singleton*.  Starting from the left, property value pairs are
+%      applied to the GUI before fourbar_OpeningFcn gets called.  An
+%      unrecognized property name or invalid value makes property application
+%      stop.  All inputs are passed to fourbar_OpeningFcn via varargin.
+%
+%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
+%      instance to run (singleton)".
+%
+% See also: GUIDE, GUIDATA, GUIHANDLES
+
+% Edit the above text to modify the response to help fourbar
+
+% Last Modified by GUIDE v2.5 20-Aug-2009 03:36:48
+
+% Begin initialization code - DO NOT EDIT
+gui_Singleton = 1;
+gui_State = struct('gui_Name',       mfilename, ...
+                   'gui_Singleton',  gui_Singleton, ...
+                   'gui_OpeningFcn', @fourbar_OpeningFcn, ...
+                   'gui_OutputFcn',  @fourbar_OutputFcn, ...
+                   'gui_LayoutFcn',  [] , ...
+                   'gui_Callback',   []);
+if nargin && ischar(varargin{1})
+    gui_State.gui_Callback = str2func(varargin{1});
+end
+
+if nargout
+    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+else
+    gui_mainfcn(gui_State, varargin{:});
+end
+% End initialization code - DO NOT EDIT
+
+
+% --- Executes just before fourbar is made visible.
+function fourbar_OpeningFcn(hObject, eventdata, handles, varargin)
+% This function has no output args, see OutputFcn.
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% varargin   command line arguments to fourbar (see VARARGIN)
+
+% Choose default command line output for fourbar
+handles.output = hObject;
+
+% Update handles structure
+guidata(hObject, handles);
+
+% UIWAIT makes fourbar wait for user response (see UIRESUME)
+% uiwait(handles.figure1);
+
+
+% --- Outputs from this function are returned to the command line.
+function varargout = fourbar_OutputFcn(hObject, eventdata, handles) 
+% varargout  cell array for returning output args (see VARARGOUT);
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Get default command line output from handles structure
+varargout{1} = handles.output;
+
+
+% --- Executes on selection change in listbox1.
+function listbox1_Callback(hObject, eventdata, handles)
+% hObject    handle to listbox1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = get(hObject,'String') returns listbox1 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from listbox1
+
+
+% --- Executes during object creation, after setting all properties.
+function listbox1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to listbox1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in listbox2.
+function listbox2_Callback(hObject, eventdata, handles)
+% hObject    handle to listbox2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = get(hObject,'String') returns listbox2 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from listbox2
+
+
+% --- Executes during object creation, after setting all properties.
+function listbox2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to listbox2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in listbox3.
+function listbox3_Callback(hObject, eventdata, handles)
+% hObject    handle to listbox3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = get(hObject,'String') returns listbox3 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from listbox3
+
+
+% --- Executes during object creation, after setting all properties.
+function listbox3_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to listbox3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in listbox4.
+function listbox4_Callback(hObject, eventdata, handles)
+% hObject    handle to listbox4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = get(hObject,'String') returns listbox4 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from listbox4
+
+
+% --- Executes during object creation, after setting all properties.
+function listbox4_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to listbox4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in pushbutton1.
+function pushbutton1_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+a=get(handles.listbox1,'value');
+b=get(handles.listbox1,'string');
+if a>1;
+    c=b{a,1};
+    [x,y]=size(c);
+    if y>0
+    b{a,1}='';
+    b1=revolute(b);
+    set(handles.listbox1,'value',1);
+    b2=remspace(b1,2);
+    set(handles.listbox1,'string',b2);
+..............get value
+    d=(get(handles.edit1,'string'));
+    d=char(d);
+    ss=createspace(c,':=');
+    ss=createspace(ss,d);
+    sss={ss};
+    ee=get(handles.listbox2,'string');
+    ee=revolute(ee);
+    ee=stick(ee,sss);
+    set(handles.listbox2,'value',1);
+    ee=remspace(ee,2);
+    set(handles.listbox2,'string',ee);
+    end
+end
+
+
+% --- Executes on button press in pushbutton2.
+function pushbutton2_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+a=get(handles.listbox2,'value');
+b=get(handles.listbox2,'string');
+if a>1
+c=b{a,1};
+[x,y]=size(c);
+if y>0
+b{a,1}='';
+b1=revolute(b);
+set(handles.listbox2,'value',1);
+b2=remspace(b1,2);
+set(handles.listbox2,'string',b2);
+..............get parameter
+taken=strtok(c);
+sss{1,1}=taken;
+ee=get(handles.listbox1,'string');
+ee=revolute(ee);
+ee=stick(ee,sss);
+ee=remspace(ee,2);
+set(handles.listbox1,'value',1);
+set(handles.listbox1,'string',ee);
+end
+end
+
+
+% --- Executes on button press in pushbutton3.
+function pushbutton3_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+a=get(handles.listbox3,'value');
+b=get(handles.listbox3,'string');
+if a>1
+c=b{a,1};
+[x,y]=size(c);
+if y>0
+b{a,1}='';
+b1=revolute(b);
+set(handles.listbox3,'value',1);
+b2=remspace(b1,2);
+set(handles.listbox3,'string',b2);
+..............get value
+d=(get(handles.edit2,'string'));
+d=char(d);
+ss=createspace(c,':=');
+ss=createspace(ss,d);
+sss={ss};
+ee=get(handles.listbox4,'string');
+ee=revolute(ee);
+ee=stick(ee,sss);
+set(handles.listbox4,'value',1);
+ee=remspace(ee,2);
+set(handles.listbox4,'string',ee);
+end
+end
+
+
+% --- Executes on button press in pushbutton4.
+function pushbutton4_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+a=get(handles.listbox4,'value');
+b=get(handles.listbox4,'string');
+if a>1
+c=b{a,1};
+[x,y]=size(c);
+if y>0
+b{a,1}='';
+b1=revolute(b);
+b2=remspace(b1,2);
+set(handles.listbox4,'value',1);
+set(handles.listbox4,'string',b2);
+..............get parameter
+taken=strtok(c);
+sss{1,1}=taken;
+ee=get(handles.listbox3,'string');
+ee=revolute(ee);
+ee=stick(ee,sss);
+ee=remspace(ee,2);
+set(handles.listbox3,'value',1);
+set(handles.listbox3,'string',ee);
+end
+end
+
+
+
+function edit1_Callback(hObject, eventdata, handles)
+% hObject    handle to edit1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit1 as text
+%        str2double(get(hObject,'String')) returns contents of edit1 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit2_Callback(hObject, eventdata, handles)
+% hObject    handle to edit2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit2 as text
+%        str2double(get(hObject,'String')) returns contents of edit2 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --------------------------------------------------------------------
+function Untitled_1_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function Untitled_2_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function p2type1_Callback(hObject, eventdata, handles)
+% hObject    handle to p2type1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+a={'W','theta+beta2','Z','phi+alpha2','-P21','delta2','-Z','phi','-W','theta'};
+......................show equ
+set(handles.listbox6,'value',1);
+set(handles.listbox6,'string','');
+show1=get(handles.listbox6,'string');
+show1=revolute(show1);
+z=zequ(a);
+z=revolute(z);
+s1=stick(z,show1);
+set(handles.listbox6,'string',s1);
+%..........................
+global fourbar numzequ
+set(handles.listbox1,'value',1);
+set(handles.listbox3,'value',1);
+set(handles.listbox2,'value',1);
+set(handles.listbox4,'value',1);
+fourbar=1;
+numzequ=2;
+h=imread('fourbar_2p_1.png');
+image(h);
+set(handles.back,'Enable','off');
+set(handles.go,'Enable','on');
+set(handles.back,'Enable','off');
+A={'Lenght para';'W';'Z';'P21'};
+B={'Angle para';'theta';'beta2';'phi';'delta2';'alpha2'};
+set(handles.listbox1,'string',A);
+set(handles.listbox3,'string',B);
+set(handles.listbox2,'string','assumes');
+set(handles.listbox4,'string','assumes');
+set(handles.text7,'string','8');
+set(handles.text8,'string','2');
+% --------------------------------------------------------------------
+function p3type1_Callback(hObject, eventdata, handles)
+% hObject    handle to p3type1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global fourbar numzequ
+fourbar=4;
+numzequ=4;
+...............
+a={'W','theta+beta2','-W','theta','Z','alpha2+phi','-Z','phi','-P21','delta2'};
+b={'W','theta+beta3','-W','theta','Z','alpha3+phi','-Z','phi','-P31','delta3'};
+......................show equ
+set(handles.listbox6,'value',1);
+set(handles.listbox6,'string','');
+show1=get(handles.listbox6,'string');
+show1=revolute(show1);
+z=zequ(a);
+z=revolute(z);
+s1=stick(z,show1);
+set(handles.listbox6,'string',s1);
+show1=get(handles.listbox6,'string');
+show1=revolute(show1);
+z=zequ(b);
+z=revolute(z);
+s1=stick(z,show1);
+set(handles.listbox6,'string',s1);
+%..........................
+set(handles.listbox1,'value',1);
+set(handles.listbox3,'value',1);
+set(handles.listbox2,'value',1);
+set(handles.listbox4,'value',1);
+h=imread('fourbar_3p_1.png');
+image(h);
+set(handles.back,'Enable','off');
+set(handles.go,'Enable','on');
+A={'Lenght para';'W';'Z';'P21';'P31'};
+B={'Angle para';'theta';'beta2';'beta3';'alpha2';'alpha3';'phi';'delta2';'delta3'};
+set(handles.listbox1,'string',A);
+set(handles.listbox3,'string',B);
+set(handles.listbox2,'string','assumes');
+set(handles.listbox4,'string','assumes');
+set(handles.text7,'string','12');
+set(handles.text8,'string','4');
+
+
+% --------------------------------------------------------------------
+function go_ClickedCallback(hObject, eventdata, handles)
+% hObject    handle to go (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global fourbar
+set(handles.listbox1,'value',1);
+set(handles.listbox3,'value',1);
+if fourbar==1
+    h=imread('fourbar_2p_2.png');
+    image(h);
+    set(handles.back,'Enable','on');
+    set(handles.go,'Enable','off');
+    A={'Lenght para';'U';'S';'P12'};
+    B={'Angle para';'sigma';'gamma2';'psi';'alpha2';'delt2a'};
+    set(handles.listbox1,'string',A);
+    set(handles.listbox3,'string',B);
+    set(handles.text7,'string','8');
+    set(handles.text8,'string','2');
+elseif fourbar==2
+    h=imread('fourbar_2p_2.png');
+    image(h);
+    set(handles.back,'Enable','on');
+    set(handles.go,'Enable','off');
+    A={'Lenght para';'U';'S';'P2[x]';'P2[y]'};
+    B={'Angle para';'sigma';'gamma2';'psi';'alpha2'};
+    set(handles.listbox1,'string',A);
+    set(handles.listbox3,'string',B);
+    %set(handles.text4,'string','you should define P2[x] & P2[y]');
+elseif fourbar==4
+    h=imread('fourbar_3p_2.png');
+    image(h);
+    set(handles.back,'Enable','on');
+    set(handles.go,'Enable','off');
+    A={'Lenght para';'U';'S';'P12';'P13'};
+    B={'Angle para';'sigma';'gamma2';'gamma3';'alpha2';'alpha3'; 'psi';'delta2';'delta3'};
+    set(handles.listbox1,'string',A);
+    set(handles.listbox3,'string',B);
+end
+
+
+% --------------------------------------------------------------------
+function back_ClickedCallback(hObject, eventdata, handles)
+% hObject    handle to back (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global fourbar
+set(handles.listbox1,'value',1);
+set(handles.listbox3,'value',1);
+if fourbar==1
+    h=imread('fourbar_2p_1.png');
+    image(h);
+    set(handles.back,'Enable','off');
+    set(handles.go,'Enable','on');
+    A={'Lenght para';'W';'Z';'P12'};
+    B={'Angle para';'theta';'beta2';'phi';'alpha2';'delta2'};
+    set(handles.listbox1,'string',A);
+    set(handles.listbox3,'string',B);
+elseif fourbar==2
+    h=imread('fourbar_2p_1.png');
+    image(h);
+    set(handles.back,'Enable','off');
+    set(handles.go,'Enable','on');
+    A={'Lenght para';'W';'Z';'P2[x]';'P2[y]'};
+    B={'Angle para';'theta';'beta2';'phi';'alpha2'};
+    set(handles.listbox1,'string',A);
+    set(handles.listbox3,'string',B);
+   % set(handles.text4,'string','you should define P2[x] & P2[y]');
+elseif fourbar==4
+    h=imread('fourbar_3p_1.png');
+    image(h);
+    set(handles.back,'Enable','off');
+    set(handles.go,'Enable','on');
+    A={'Lenght para';'W';'Z';'P12';'P13'};
+    B={'Angle para';'theta';'beta2';'alpha2';'phi';'delta2';'delta3'};
+    set(handles.listbox1,'string',A);
+    set(handles.listbox3,'string',B);
+end
+
+
+% --------------------------------------------------------------------
+function p3type2_Callback(hObject, eventdata, handles)
+% hObject    handle to p3type2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global fourbar numzequ
+...........
+fourbar=5;
+numzequ=4;
+..........
+a={'W','theta+beta2','-W','theta','Z','alpha2+phi','-Z','phi','-P31','delta2'};
+b={'W','theta+beta3','-W','theta','Z','alpha3+phi','-Z','phi','-P31','delta3'};
+......................show equ
+set(handles.listbox6,'value',1);
+set(handles.listbox6,'string','');
+show1=get(handles.listbox6,'string');
+show1=revolute(show1);
+z=zequ(a);
+z=revolute(z);
+s1=stick(z,show1);
+set(handles.listbox6,'string',s1);
+show1=get(handles.listbox6,'string');
+show1=revolute(show1);
+z=zequ(b);
+z=revolute(z);
+s1=stick(z,show1);
+set(handles.listbox6,'string',s1);
+%..........................
+set(handles.listbox1,'value',1);
+set(handles.listbox3,'value',1);
+set(handles.listbox2,'value',1);
+set(handles.listbox4,'value',1);
+h=imread('fourbar_3p_1.png');
+image(h);
+set(handles.back,'Enable','off');
+set(handles.go,'Enable','on');
+A={'Lenght para';'W';'Z';'P2[x]';'p2[y]';'P3[x]';'P3[y]'};
+B={'Angle para';'theta';'beta2';'beta3';'alpha2';'alpha3';'phi'};
+set(handles.listbox1,'string',A);
+set(handles.listbox3,'string',B);
+set(handles.listbox2,'string','assumes');
+set(handles.listbox4,'string','assumes');
+%set(handles.text4,'string','you should define P2[x] & P2[y] & P3[x]  &  P3[y]');
+
+% --------------------------------------------------------------------
+function p2type2_Callback(hObject, eventdata, handles)
+% hObject    handle to p2type2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+a={'W','theta+beta2','Z','phi+alpha2','-P21','delta2','-Z','phi','-W','theta'};
+......................show equ
+set(handles.listbox6,'value',1);
+set(handles.listbox6,'string','');
+show1=get(handles.listbox6,'string');
+show1=revolute(show1);
+z=zequ(a);
+z=revolute(z);
+s1=stick(z,show1);
+set(handles.listbox6,'string',s1);
+%..........................
+global fourbar numzequ
+set(handles.listbox1,'value',1);
+set(handles.listbox3,'value',1);
+set(handles.listbox2,'value',1);
+set(handles.listbox4,'value',1);
+fourbar=2;
+numzequ=2;
+h=imread('fourbar_2p_1.png');
+image(h);
+set(handles.back,'Enable','off');
+set(handles.go,'Enable','on');
+A={'Lenght para';'W';'Z';'P2[x]';'P2[y]'};
+B={'Angle para';'theta';'beta2';'alpha2';'phi'};
+set(handles.listbox1,'string',A);
+set(handles.listbox3,'string',B);
+set(handles.listbox2,'string','assumes');
+set(handles.listbox4,'string','assumes');
+%set(handles.text4,'string','you should define P2[x] & P2[y]');
+
+% --- Executes on button press in solve.
+function solve_Callback(hObject, eventdata, handles)
+% hObject    handle to solve (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global numzequ fourbar
+numzequ
+fourbar
+maple('restart');
+show=get(handles.listbox6,'string');
+[m,n]=size(show);
+h3 = waitbar(0,'Please wait...');
+A1=get(handles.listbox1,'string');
+B1=get(handles.listbox3,'string');
+A1=revolute(A1);
+B1=revolute(B1);
+A1=remspace(A1,1);
+B1=remspace(B1,1);
+[l1,k1]=size(A1);
+[l2,k2]=size(B1);
+k=(k1+k2-2)
+f=numzequ
+waitbar(.1);
+if k==f;
+     for i=1:m;
+        [x,y]=size(show{i,1});
+            if y>0
+                 equ1{i,1}=strcat('f',num2str(i),':=',show{i,1});
+                 maple(equ1{i,1});
+            end
+     end
+     waitbar(0.1);
+     A=get(handles.listbox2,'string');
+     B=get(handles.listbox4,'string');
+     [m1,n1]=size(A);
+     [m2,n2]=size(B);
+     for i=2:m1
+         [x,y]=size(A{i,1});
+             if y>0
+                   maple(A{i,1});
+             end
+     end
+     waitbar(.2);
+     for i=2:m2
+        [x,y]=size(B{i,1});
+         if y>0
+             [taken1,remain]=strtok(B{i,1});
+             [taken,remain]=strtok(remain);
+             remain=str2num(remain);
+             remain=remain*3.1416/180;
+             st=strcat(taken1,':=',num2str(remain));
+             maple(st);
+         end
+     end
+%%%%%%baeda az khandane motaghayera
+   if fourbar==2
+       slope1('P2[x]','P2[y]','21','2');
+   end
+   if fourbar==5
+       slope1('P2[x]','P2[y]','21','2');
+       slope1('P3[x]','P3[y]','31','3');
+   end
+   if fourbar==6
+        findb2b3
+        b2b3{1,1}=strcat('beta2=',maple('beta2'));
+   b2b3{2,1}=strcat('beta3=',maple('beta3'));
+   set(handles.edit3,'string',b2b3);
+   else
+
+    [m3,n3]=size(equ1);
+    %%%____jagozari
+    for i=1:m3;
+         [x,y]=size(equ1{i,1});
+         if y>0
+             [taken,remain]=strtok(show{i,1});
+             equ2{i,1}=strcat('g',num2str(i),':=','f',num2str(i),taken);
+             maple(equ2{i,1});
+         end
+    end
+    waitbar(.4);
+%%%____hal
+    for i=1:m3;
+         if i==1
+             sa=strcat('(','g',num2str(i),',');
+         end
+         if 1<i & i<m3
+             la=strcat('g',num2str(i),',');
+             sa=strcat(sa,la);
+         end
+         if i==m3;
+             sa=strcat(sa,'g',num2str(i),')');
+         end
+    end
+    A1=get(handles.listbox2,'string');
+    [w1,w2]=size(A1);
+    sa=strcat('stringofzequation',':=','fsolve','(','{',sa,'}',')');
+    r=maple(sa);
+    numberpara=numzequ;
+    answ=result(r,numberpara);
+    waitbar(.5);
+    controlans=answ{1,1};
+    kk=strcmp(controlans,'imposible');
+    if kk==0;
+..............2222...............
+          A1=get(handles.listbox2,'string');
+          B1=get(handles.listbox3,'string');
+             for i=1:numberpara
+                   [para,remain]=strtok(answ{i,1});
+                   [token,svalue]=strtok(remain);
+                   d=search(A1,para);
+                        if d==1;
+                             value=str2num(svalue);
+                                if value<0
+                                     svalue=strcat(svalue,'!!!');
+                                     answ{i,1}=strcat(para,'=',svalue);
+                                end
+                        end
+            waitbar(.6);
+            d=search(B1,para);
+                  if d==1
+                    value=str2num(svalue);
+                    value=value*180/3.1415;
+                           while value>360;
+                                value=value-360;
+                           end
+                           while value<0
+                               value=value+360;
+                           end
+                          if value>180
+                               value=value-360;
+                          end
+                          svalue=num2str(value);
+                          answ{i,1}=strcat(para,'=',svalue);
+                  end 
+             end
+       waitbar(.9);
+       set(handles.edit3,'string',answ);
+        %set(handles.pushbutton7,'Enable','on');
+   else
+    set(handles.edit3,'string',{'result:';'ckeck assumes!!!'});
+    waitbar(.9);
+    end
+   end
+end
+close(h3)
+
+
+% --- Executes during object creation, after setting all properties.
+%function listbox5_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to listbox5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+%if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+%    set(hObject,'BackgroundColor','white');
+%end
+
+
+% --- Executes on selection change in listbox6.
+function listbox6_Callback(hObject, eventdata, handles)
+% hObject    handle to listbox6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = get(hObject,'String') returns listbox6 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from listbox6
+
+
+% --- Executes during object creation, after setting all properties.
+function listbox6_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to listbox6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit3_Callback(hObject, eventdata, handles)
+% hObject    handle to edit3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit3 as text
+%        str2double(get(hObject,'String')) returns contents of edit3 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit3_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --------------------------------------------------------------------
+function Untitled_3_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function Untitled_4_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function ftype1_Callback(hObject, eventdata, handles)
+% hObject    handle to ftype1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+a={'W','theta+beta2','Z','phi+alpha2','-Z','phi','-W','theta','-U','sigma+gamma2','U','sigma'};
+......................show equ
+set(handles.listbox6,'value',1);
+set(handles.listbox6,'string','');
+show1=get(handles.listbox6,'string');
+show1=revolute(show1);
+z=zequ(a);
+z=revolute(z);
+s1=stick(z,show1);
+set(handles.listbox6,'string',s1);
+%..........................
+global fourbar numzequ
+set(handles.listbox1,'value',1);
+set(handles.listbox3,'value',1);
+set(handles.listbox2,'value',1);
+set(handles.listbox4,'value',1);
+fourbar=7;
+numzequ=2;
+h=imread('fourbar_f1.png');
+image(h);
+set(handles.back,'Enable','off');
+set(handles.go,'Enable','off');
+A={'Lenght para';'W';'Z';'U'};
+B={'Angle para';'theta';'beta2';'alpha2';'phi';'sigma';'gamma2'};
+set(handles.listbox1,'string',A);
+set(handles.listbox3,'string',B);
+set(handles.listbox2,'string','assumes');
+set(handles.listbox4,'string','assumes');
+set(handles.text7,'string','9');
+set(handles.text8,'string','2');
+
+
+% --------------------------------------------------------------------
+function ftype2_Callback(hObject, eventdata, handles)
+% hObject    handle to ftype2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+a={'W','theta+beta2','Z','phi+alpha2','-Z','phi','-W','theta','-U','sigma+gamma2','U','sigma'};
+b={'W','theta+beta3','Z','phi+alpha3','-Z','phi','-W','theta','-U','sigma+gamma3','U','sigma'};
+......................show equ
+set(handles.listbox6,'value',1);
+set(handles.listbox6,'string','');
+show1=get(handles.listbox6,'string');
+show1=revolute(show1);
+z=zequ(a);
+z=revolute(z);
+s1=stick(z,show1);
+set(handles.listbox6,'string',s1);
+show1=get(handles.listbox6,'string');
+show1=revolute(show1);
+z=zequ(b);
+z=revolute(z);
+s1=stick(z,show1);
+set(handles.listbox6,'string',s1);
+%..........................
+global fourbar numzequ
+set(handles.listbox1,'value',1);
+set(handles.listbox3,'value',1);
+set(handles.listbox2,'value',1);
+set(handles.listbox4,'value',1);
+fourbar=8;
+numzequ=4;
+h=imread('fourbar_f2.png');
+image(h);
+set(handles.back,'Enable','off');
+set(handles.go,'Enable','off');
+A={'Lenght para';'W';'Z';'U'};
+B={'Angle para';'theta';'beta2';'beta3';'alpha2';'alpha3';'phi';'sigma';'gamma2';'gamma3'};
+set(handles.listbox1,'string',A);
+set(handles.listbox3,'string',B);
+set(handles.listbox2,'string','assumes');
+set(handles.listbox4,'string','assumes');
+set(handles.text7,'string','12');
+set(handles.text8,'string','4');
+
+
+
+% --------------------------------------------------------------------
+function p3type3_Callback(hObject, eventdata, handles)
+% hObject    handle to p3type3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+a={'R3','xi3+alpha2','-R2','xi2+alpha3','R1','xi1+beta2+alpha3','-R3','xi3+beta2','R2','xi2+beta3','-R1','xi1+alpha2+beta3'};
+......................show equ
+set(handles.listbox6,'value',1);
+set(handles.listbox6,'string','');
+show1=get(handles.listbox6,'string');
+show1=revolute(show1);
+z=zequ(a);
+z=revolute(z);
+s1=stick(z,show1);
+set(handles.listbox6,'string',s1);
+%..........................
+global fourbar numzequ
+h=imread('fourbar_3p_b.png');
+image(h);
+set(handles.back,'Enable','off');
+set(handles.go,'Enable','on');
+set(handles.listbox1,'value',1);
+set(handles.listbox3,'value',1);
+set(handles.listbox2,'value',1);
+set(handles.listbox4,'value',1);
+fourbar=6;
+numzequ=0;
+A={'Lenght para';'R1';'R2';'R3'};
+B={'Angle para';'xi1';'xi2';'xi3';'alpha2';'alpha3'};
+set(handles.listbox1,'string',A);
+set(handles.listbox3,'string',B);
+set(handles.listbox2,'string','assumes');
+set(handles.listbox4,'string','assumes');
+set(handles.text7,'string','10');
+set(handles.text8,'string','2');
+helpdlg('in here you should solve equation for betta2 & betta3  ','Quick help')
+
+
+function edit4_Callback(hObject, eventdata, handles)
+% hObject    handle to edit4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit4 as text
+%        str2double(get(hObject,'String')) returns contents of edit4 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit4_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --------------------------------------------------------------------
+function stype1_Callback(hObject, eventdata, handles)
+% hObject    handle to stype1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+%a={'Z1','theta1','Z2','theta2','Z3','theta3','Z4','theta4'};
+%b={'Z1+x1','theta1','Z2','theta2+phi2','Z3','theta3+gamma2','Z4','theta4'};
+a={'Z4','theta4','Z2','theta2','Z3','theta3','Z1','theta1'};
+b={'Z4','theta4','Z2','theta2+phi2','Z3','theta3+gamma2','Z1+x1','theta1'};
+......................show equ
+set(handles.listbox6,'value',1);
+set(handles.listbox6,'string','');
+show1=get(handles.listbox6,'string');
+show1=revolute(show1);
+z=zequ(a);
+z=revolute(z);
+s1=stick(z,show1);
+set(handles.listbox6,'string',s1);
+show1=get(handles.listbox6,'string');
+show1=revolute(show1);
+z=zequ(b);
+z=revolute(z);
+s1=stick(z,show1);
+set(handles.listbox6,'string',s1);
+%..........................
+global fourbar numzequ
+h=imread('fourbar_slider.png');
+image(h);
+set(handles.back,'Enable','off');
+set(handles.go,'Enable','off');
+set(handles.listbox1,'value',1);
+set(handles.listbox3,'value',1);
+set(handles.listbox2,'value',1);
+set(handles.listbox4,'value',1);
+fourbar=6;
+numzequ=0;
+A={'Lenght para';'Z1';'Z2';'Z3';'X1'};
+B={'Angle para';'theta1';'theta2';'theta3';'theta4';'phi2';'gamma2'};
+set(handles.listbox1,'string',A);
+set(handles.listbox3,'string',B);
+set(handles.listbox2,'string','assumes');
+set(handles.listbox4,'string','assumes');
+set(handles.text7,'string','10');
+set(handles.text8,'string','4');
+
+
+% --------------------------------------------------------------------
+function stype2_Callback(hObject, eventdata, handles)
+% hObject    handle to stype2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+a={'Z4','theta4','Z2','theta2','Z3','theta3','Z1','theta1'};
+b={'Z4','theta4','Z2','theta2+phi2','Z3','theta3+gamma2','Z1+x1','theta1'};;
+c={'Z4','theta4','Z2','theta2+phi3','Z3','theta3+gamma3','Z1+x2','theta1'};
+......................show equ
+set(handles.listbox6,'value',1);
+set(handles.listbox6,'string','');
+show1=get(handles.listbox6,'string');
+show1=revolute(show1);
+z=zequ(a);
+z=revolute(z);
+s1=stick(z,show1);
+set(handles.listbox6,'string',s1);
+show1=get(handles.listbox6,'string');
+show1=revolute(show1);
+z=zequ(b);
+z=revolute(z);
+s1=stick(z,show1);
+set(handles.listbox6,'string',s1);
+set(handles.listbox6,'string',s1);
+show1=get(handles.listbox6,'string');
+show1=revolute(show1);
+z=zequ(c);
+z=revolute(z);
+s1=stick(z,show1);
+set(handles.listbox6,'string',s1);
+%..........................
+global fourbar numzequ
+h=imread('fourbar_slider.png');
+image(h);
+set(handles.back,'Enable','off');
+set(handles.go,'Enable','off');
+set(handles.listbox1,'value',1);
+set(handles.listbox3,'value',1);
+set(handles.listbox2,'value',1);
+set(handles.listbox4,'value',1);
+fourbar=6;
+numzequ=0;
+A={'Lenght para';'Z1';'Z2';'Z3';'X1';'X2'};
+B={'Angle para';'theta1';'theta2';'theta3';'theta4';'phi2';'phi3';'gamma2';'gamma3'};
+set(handles.listbox1,'string',A);
+set(handles.listbox3,'string',B);
+set(handles.listbox2,'string','assumes');
+set(handles.listbox4,'string','assumes');
+set(handles.text7,'string','13');
+set(handles.text8,'string','6');
+

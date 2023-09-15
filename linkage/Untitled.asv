@@ -1,0 +1,77 @@
+ clear
+  clc
+  
+syms x1 x2 x3 x4 x5 x6 x7
+ syms y1 y2 y3 y4 y5 y6 y7
+ syms t1 t2 t3 t4 t5 t6 t7 t
+ q=[x1 y1 t1 x2 y2 t2 x3 y3 t3 ];
+q0=zeros(21,1);
+%--------------------------------------------------------------------------
+c={
+    '+t2'
+    '+y2-0.43384'
+    '+x2-x1-2.637*cos(t1)'
+    '+y2-y1-2.637*sin(t1)'
+    '+x3-0.82383*cos(t3)-x1+2.637*cos(t1)'
+    '+y3-0.82383*sin(t3)-y1+2.637*sin(t1)'
+    '+x3+0.82383*cos(t3)+2.2701'
+    '+y3+0.82383*sin(t3)-0.8243'
+
+    't1-.62832*t'};
+
+for t=1:9
+   cq{t,1} =inline(jacobian(char(c(t,1)),q));
+end
+
+tic
+for i=1:21
+gh= cq{i,1};
+xy=c{i,1};
+[n,u]=size(xy);
+andis=zeros(1,2);
+d=0;
+ k=1;
+for s=1:u 
+    p1=isequal(xy(s),'s'); 
+    p2=isequal(xy(s),'c');
+  
+   
+    if p1==1|p2==1
+         %-------------------------    
+   for s=1:u-1     
+   r=isequal(xy(s),'t');
+    if r==1
+andis(1,k)=str2num(xy(s+1));
+ 
+      k=k+1;
+      d=d+1 ;
+    end
+   end 
+ if d==1
+  cq1=gh(q0(3*andis(1,1)));
+  for j=1:21
+      cq0(i,j)=cq1(1,j);
+  end
+  elseif d==2
+  cq1=gh(q0(3*andis(1,1)),q0(3*andis(1,2)));
+   for j=1:21
+      cq0(i,j)=cq1(1,j);
+  end
+ end
+  %-------------------
+ 
+       break
+   
+    end
+  
+end
+ if p1==0&p2==0
+       cq1=gh(0);
+        for j=1:21
+      cq0(i,j)=cq1(1,j);
+  end
+  end
+end
+  toc
+%display(cq0)
+  

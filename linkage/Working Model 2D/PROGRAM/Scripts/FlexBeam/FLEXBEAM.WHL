@@ -1,0 +1,29 @@
+// Help file for Flexbeam.wbs
+// Lines cannot get too long
+// Any line containing a comma needs to be enclosed in double quotes
+//
+"Before executing Flexbeam, select the rigid rectangular body"
+within your Working Model document which is to be modeled
+as a flexible beam.  The dialog box requests values for the 
+structural stiffness of the beam (EI) and the number of elements (n) 
+with which to model the beam.  The structural stiffness can be 
+chosen through either the highly stiff or minimally stiff default 
+options or through the custom option.  The default options 
+provide a specified deflection for a characteristic load which
+is based on the weight of the beam.  The highly stiff option
+"currently specifies roughly a 3 % deflection, while the minimally"
+stiff option specifies a 10 % deflection.
+
+"The first input quantity, the structural stiffness, is the product of E,"
+"Young's modulus of elasticity, and I, the area moment of inertia for"
+the beam cross section.  Working Model is unable to calculate I
+because it is a planar program and the beam cross section has a
+dimension that is not included in the working model plane.
+
+"The second input quantity is n, the number of rectangular elements"
+with which to approximate the flexible body.  The larger the value
+"of n, the more accurate this approximation is.  However, as the"
+"warning message indicates, the user should be careful to avoid"
+using more elements than necessary.
+
+ [end]

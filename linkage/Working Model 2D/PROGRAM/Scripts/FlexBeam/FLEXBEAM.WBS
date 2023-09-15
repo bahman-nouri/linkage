@@ -1,0 +1,581 @@
+'Global Variables
+	dim rigid as double
+	dim flexible as double
+
+CONST DEBUG = 0	 	' This constant should be 0, unless debugging the Optimize code (1 for file output, 2 for file and viewport (not available on macintosh))
+
+Function ReadHelpFile(file as string,ByRef HelpString() as string) as integer
+
+	' Reads the helpfile.  Skips lines starting with // (a comment).
+	' Terminates when it finds [end]
+
+	Dim lines as integer, tempst as string
+	ReDim HelpString(FileLen(file))
+	If not fileexists(file) then
+		MsgBox "Cannot find help file "+file
+		ReadHelpFile = -1
+		Exit Function
+	End If
+	Open file for input As #3
+	lines = 0
+	Do
+		Input #3, tempst
+		If InStr(tempst,"//")=0 and InStr(tempst,"[end]")=0 then  	' valid line
+		  	HelpString(lines) = tempst
+			lines = lines+1
+		End	If
+	Loop Until InStr(tempst,"[end]")>0		' Help end encountered
+	ReDim Preserve HelpString(lines-1)		' Make HelpString only as big as needed
+	ReadHelpFile = lines
+	Close #3	
+End Function
+
+Sub DisplayHelp
+
+	' DisplayHelp displayes the help dialog
+	
+	Dim sHelp() as string
+	Begin Dialog HelpDialog ,,240,224,"Optimize Tool Help"
+		OKButton 90,204,40,14
+		ListBox 5,4,230,200,sHelp$,.sHelp
+	End Dialog
+	Dim temp as string
+
+	sep = Basic.PathSeparator$		' Stores the appropriate path separator for this platform
+	
+	' Hard-coded path name for the help file
+	Dim helpFile as string
+	helpFile = Basic.HomeDir$ + sep + "scripts" + sep + "flexbeam" + sep + "flexbeam.whl"
+	
+	If ReadHelpFile(helpFile, sHelp())=-1 then		' Cannot find help file
+  		Exit Sub
+	end If
+
+	Dim HelpD as HelpDialog
+	dialog HelpD
+
+End Sub
+
+Sub DebugPrint (Message as string)
+	If DEBUG>0 then
+		If Basic.OS = ebWin16 or Basic.OS = ebWIn32 then
+			If DEBUG=2 then
+		 		ViewportOpen
+				Print Message
+			elseIf DEBUG=1 then
+				Print #1,Message
+			end If
+		elseIf Basic.OS = ebMacintosh then
+			Print #1,Message
+		End If
+	End If
+End Sub
+ 
+Function EIFunction(id as string, action as integer, suppval as integer)
+	dim d as WMDocument: set d = WM.ActiveDocument
+	Select Case action
+		Case 1
+			DlgText "TextBox1", Str(rigid)
+			DlgValue "OptionGroup1", 0
+			DlgFocus "OptionGroup1"
+			DlgText "TextBox2", Str(4)
+			'Install unit system consistent with current configuration of the document
+   			d.UnitSystem = "custom"
+			if mid(d.ForceUnit, 1, 2) = "ne" then
+				DlgText "Text5", "N-m^2"
+			else
+				DlgText "Text5", "lbf-in^2"
+			end if
+
+		Case 2
+			if id = "OptionButton1" then
+				DlgText "TextBox1", Str(rigid)
+			end if	
+			if id = "OptionButton2" then
+				DlgText "TextBox1", Str(flexible)
+			end if	
+			if id = "OptionButton3" then
+				DlgText "TextBox1",""
+				DlgFocus "TextBox1"
+			end if	
+		Case 3
+			if id = "TextBox1" then
+				DlgValue "OptionGroup1", 2
+			end if
+		Case Else
+	End Select
+End Function
+Begin Dialog FlexDialog ,,247,134,"Flexible Body Information",.EIFunction
+	OKButton 200,8,40,14
+	CancelButton 200,28,40,14
+	Text 4,80,176,8,"Number of Elements to Represent the Flexible Body",.Text2
+	TextBox 28,96,36,12,.TextBox2
+	Text 4,112,240,16,"WARNING:  Large values of EI or n significantly reduce the simulation speed.  The integration time is proportional to EI and proportional to n^2.",.Text3
+	OptionGroup .OptionGroup1
+		OptionButton 28,24,70,8,"Highly Stiff",.OptionButton1
+		OptionButton 28,40,70,8,"Minimally Stiff",.OptionButton2
+		OptionButton 28,56,70,8,"Custom Stiffness",.OptionButton3
+	GroupBox 8,8,188,60,"Structural Stiffness",.GroupBox1
+	PushButton 200,48,40,14,"Help",.PushButton1
+	Text 92,20,16,8,"EI =",.Text1
+	TextBox 112,20,48,12,.TextBox1
+	Text 12,96,12,8,"n =",.Text4
+	Text 164,20,28,8,"Text",.Text5
+End Dialog
+
+sub GetRectangle(go as boolean, d as WMDocument, rec_sel as WMBody, NewName as string, cantileaver as boolean )
+	dim b_terry as WMBody
+	dim con as WMConstraint
+	dim n_sel_bodies as integer			'Number of selected bodies
+	dim n_select as integer
+	dim n_bodies as integer
+	dim n_rec as integer 				'Number of selected rectangles
+	dim flex_count as integer
+	dim smsg as string
+	dim body_no as string
+	dim flex_name as boolean
+
+	go = false
+	cantileaver = false
+
+	n_sel_bodies = 0
+	n_select = d.selection.count
+	n_bodies = d.bodies.count
+	n_rec = 0
+
+	'Identify rectangle to be made flexible
+	for i = 1 to d.bodies.count
+		if d.bodies.item(i).kind = "rectangle" then
+			n_rec = n_rec + 1
+		end if
+	next i
+
+	if n_rec = 1 then
+		set rec_sel = d.body("rectangle")
+		go = true
+	else	
+		n_select = d.selection.count
+		n_bodies = 0
+		n_rec = 0
+		for i = 1 to n_select
+			if d.selection.item(i).kind = "body" then
+				n_bodies = n_bodies + 1
+				set b_terry = d.selection.body(n_bodies)
+				if b_terry.kind = "rectangle" then
+					n_rec = n_rec + 1
+					set rec_sel = b_terry
+				end if
+				set b_terry = Nothing
+			end if	   
+		next i
+		if n_rec = 1 then
+			go = true
+		end if
+		if n_rec = 0 then
+			msgbox "You must select a rectangle to use FlexBeam."
+		end if
+		if n_rec > 1 then
+			smsg = "You have selected " & str(n_rec) & " rectangles.  To use FlexBeam you must select only one."
+			msgbox smsg
+		end if
+	end if
+
+	if go then
+
+		'Determine Length of Rectangle
+		length = rec_sel.width.value
+		if ( rec_sel.height.value > length ) then
+			length = rec_sel.height.value
+		end if
+
+		'Determine if there is a cantileaver constraint
+		for i = 1 to d.constraints.count
+			for k = 1 to d.constraints.item(i).pointcount
+				if ( d.constraints.item(i).point(k).body.ID = rec_sel.ID ) then
+					if ( d.constraints.item(i).kind = "squarepin" ) then
+						set con = d.constraints.item(i)
+						if abs(con.point(k).px.value) = length / 2.0  or abs(con.point(k).py.value) = length / 2.0 then
+							cantileaver = true
+						end if  
+					end if
+				end if
+			next k
+		next i
+
+		'Identifying Name of New Flexible Body -- The name will depend on whether other flexible bodies have been defined
+		flex_name = false
+		flex_count = 0
+		While flex_name = false
+			flex_count = flex_count + 1
+			if flex_count < 10 then
+				body_no = "00"+Cstr(flex_count)
+			end if
+			if flex_count < 100 and flex_count >= 10 then
+				body_no = "0"+Cstr(flex_count)
+			end if
+			if flex_count < 1000 and flex_count >= 100 then
+				body_no = Cstr(flex_count)
+			end if
+			NewName = "flexbeam"+body_no
+			flex_name = true
+			for i = 1 to d.bodies.count
+				if mid(d.bodies.item(i).name,1,11) = NewName then
+					flex_name = false
+				end if
+			next i
+		Wend
+
+	end if
+end sub
+
+Sub flex( d as WMDocument, rec_sel as WMBody, NewName as string, EI as double, n_seg as integer)
+	dim seg(25) as WMBody 				'An array of rectangular segments which assemble to form a flexible version of selecte rectangle
+	dim body_sel as WMBody
+	dim rot_spring(50) as WMConstraint	'An array of rotational springs which connect the segments defined by seg
+	dim sq_init(50) as WMConstraint		'An array of square pins which connect the segments defined by seg, they turn off after one frame
+	dim con as WMConstraint
+	dim sqpin(10) as WMConstraint
+	dim cp(10) as WMPoint 				'Constraining points on selected rectangle
+	dim p as WMPoint 
+	dim x_ov as double 					'Fractional overlap of segments with respect to length of selected rectangle
+	dim ov as double 					'Overlap of segments
+	dim ang_rad as double 				'Orientation angle of selected rectangle in radians
+	dim length as double 				'Value for larger dimension of selected rectangle
+	dim thickness as double				'Value for smaller dimension of selected rectangle
+	dim lseg as double 					'Length of segments
+	dim orig_x as double				'Original px position of selected rectangle
+	dim orig_y as double				'Original py position of selected rectangle
+	dim orig_angle as double			'Original pr orientation angle of selected rectangle
+	dim hold_x as double
+	dim cp_x(10) as double				'X-positions of constraining points on selected rectangle
+	dim cp_y(10) as double 				'Y-positions of constraining points on selected rectangle
+	dim shift as double
+	dim ncp as integer 					'Number of constraining points on selected rectangle
+	dim nsp as integer
+	dim j as integer
+	dim i as integer
+	dim k as integer
+	dim sseg as string
+	dim sundo as string
+	dim smsg as string
+	dim align as boolean
+
+	'Initializations
+	x_ov = 0.0		'Fractional overlap of segments as Scaled by Rectangle length
+
+	'Determine Orientation of Rectangle
+	ang_rad = rec_sel.pr.value
+	shift = 0.0
+	length = rec_sel.width.value
+	thickness = rec_sel.height.value
+	align = true
+	if ( rec_sel.height.value > length ) then
+		ang_rad = ang_rad 
+		shift = 90.0
+		length = rec_sel.height.value
+		thickness = rec_sel.width.value
+		align = false
+	end if
+
+	'Put rotation in radians
+	if ( d.RotationUnit = "degrees" ) then
+		ang_rad = (ang_rad - shift) * Pi / 180
+	end if
+	if ( d.RotationUnit = "seconds" ) then
+		ang_rad = ang_rad * Pi / 3600 - shift * Pi / 180
+	end if
+	if ( d.RotationUnit = "minutes" ) then
+		ang_rad = ang_zad * Pi / 60 - shift * Pi / 180
+	end if
+	if ( d.RotationUnit = "revolutions" ) then
+		ang_rad = ang_rad * 2.0 * Pi - shift * Pi / 180
+	end if
+
+	'Save Original Position Information
+	orig_x = rec_sel.px.value
+	orig_y = rec_sel.py.value
+	orig_angle = ang_rad
+
+	'Create Segments for Rectangle
+	ov = x_ov * length
+	l_seg = ( 1.0 + ( n_seg - 1.0 )*x_ov ) * length / n_seg
+	for i = 1 to n_seg
+		set seg(i) = d.NewBody("rectangle")
+		seg(i).px.value = rec_sel.px.value - (length / 2.0 - l_seg / 2.0 - ( i - 1 ) * ( l_seg - ov ) ) * cos(ang_rad)
+		seg(i).py.value = rec_sel.py.value - (length / 2.0 - l_seg / 2.0 - ( i - 1 ) * ( l_seg - ov ) ) * sin(ang_rad)
+		seg(i).width.value = l_seg
+		seg(i).height.value = thickness
+		seg(i).pr.value = ang_rad * 180 / Pi
+		seg(i).mass.value = rec_sel.mass.value / n_seg
+
+		'Name the segment
+		if i < 10 then
+			seg(i).name = NewName+"00"+Cstr(i)
+		end if
+		if i >= 10 and i < 100 then
+			seg(i).name = NewName+"0"+Cstr(i)
+		end if
+		if i >= 100 and i < 1000 then
+			seg(i).name = NewName+Cstr(i)
+		end if
+
+	next i
+
+	'Attach Segments with square pins active for t<0.0001
+	'Remove comments when bug is removed in next version
+	for i = 1 to n_seg-1
+	 	set sq_init(i) = d.NewConstraint("pin")
+		d.split
+		set sq_init(i).point(1).body = seg(i)
+		sq_init(i).point(1).px.value = l_seg / 2.0 - ov / 2.0
+		sq_init(i).point(1).py.value = thickness / 4.0
+		set sq_init(i).point(2).body = seg(i+1)
+		sq_init(i).point(2).px.value = - l_seg / 2.0 + ov / 2.0
+		sq_init(i).point(2).py.value = thickness / 4.0
+		sq_init(i).AlwaysActive = False
+		sq_init(i).ActiveWhen.Formula = "frame()=0"
+	
+		d.join
+		d.select sq_init(i), false
+	next i
+
+	'Attach Segments with Rotational Springs
+	for i = 1 to n_seg-1
+		set rot_spring(i) = d.NewConstraint("Rspring")
+		d.split
+		set rot_spring(i).point(1).body = seg(i)
+		rot_spring(i).point(1).px.value = l_seg / 2.0 - ov / 2.0
+		rot_spring(i).point(1).py.value = 0.0
+		set rot_spring(i).point(2).body = seg(i+1)
+		rot_spring(i).point(2).px.value = - l_seg / 2.0 + ov / 2.0
+		rot_spring(i).point(2).py.value = 0.0
+
+		'Make sure units are consistent for rotational sring constant
+		if ( d.RotationUnit = "radians" ) then
+			rot_spring(i).k.value = EI / l_seg
+		end if
+		if ( d.RotationUnit = "degrees" ) then
+			rot_spring(i).k.value = ( EI / l_seg ) * Pi / 180
+		end if
+		if ( d.RotationUnit = "seconds" ) then
+			rot_spring(i).k.value = ( EI / l_seg ) * Pi / 180 / 3600
+		end if
+		if ( d.RotationUnit = "minutes" ) then
+			rot_spring(i).k.value = ( EI / l_seg ) * Pi / 180 / 60
+		end if
+		if ( d.RotationUnit = "revolutions" ) then
+			rot_spring(i).k.value = ( EI / l_seg ) * 2.0 * Pi 
+		end if
+
+		d.join
+		d.select rot_spring(i), false
+	next i
+
+	'Move Segments Back to Original Position Just in Case they Moved During their Attachment
+	seg(1).px.value = orig_x - ( length - l_seg ) * cos(orig_angle) / 2.0
+	seg(1).py.value = orig_y - ( length - l_seg ) * sin(orig_angle) / 2.0
+
+	'Replace Square Pin with Rotational Spring When Square Pin Acts as a Cantilever Constraint
+	d.selectall false
+	nsp = 0
+	for i = 1 to d.constraints.count
+		for k = 1 to d.constraints.item(i).pointcount
+			if ( d.constraints.item(i).point(k).body.ID = rec_sel.ID ) then
+				if ( d.constraints.item(i).kind = "squarepin" ) then
+					set con = d.constraints.item(i)
+					if abs(con.point(k).px.value) = length / 2.0  or abs(con.point(k).py.value) = length / 2.0 then
+						nsp = nsp + 1
+						set sqpin(nsp) = d.NewConstraint("rspring")
+						sqpin(nsp).name = NewName & "_cant"
+						d.split
+						set sqpin(nsp).point(1).body = con.point(1).body
+						set sqpin(nsp).point(2).body = con.point(2).body
+						sqpin(nsp).point(2).px.value = con.point(2).px.value
+						sqpin(nsp).point(2).py.value = con.point(2).py.value
+						sqpin(nsp).point(1).px.value = con.point(1).px.value
+						sqpin(nsp).point(1).py.value = con.point(1).py.value
+
+		  				'Make sure units are consistent for rotational sring constant
+		 				if ( d.RotationUnit = "radians" ) then
+		 					sqpin(nsp).k.value = EI * 6 * n_seg / l_seg / (3.0 * n_seg - 1.0)
+	   					end if
+		 				if ( d.RotationUnit = "degrees" ) then
+	   						sqpin(nsp).k.value = ( EI * 6 * n_seg / l_seg / (3.0 * n_seg - 1.0) ) * Pi / 180
+						end if
+		  				if ( d.RotationUnit = "seconds" ) then
+		  					sqpin(nsp).k.value = ( EI * 6 * n_seg / l_seg / (3.0 * n_seg - 1.0) ) * Pi / 180 / 3600
+		  				end if
+		  				if ( d.RotationUnit = "minutes" ) then
+		   					sqpin(nsp).k.value = ( EI * 6 * n_seg / l_seg / (3.0 * n_seg - 1.0) ) * Pi / 180 / 60
+		   				end if
+		   				if ( d.RotationUnit = "revolutions" ) then
+		  					sqpin(nsp).k.value = ( EI * 6 * n_seg / l_seg / (3.0 * n_seg - 1.0) ) * 2.0 * Pi 
+		  				end if
+
+						d.join
+						d.select sqpin(nsp), false
+						d.select sqpin(nsp).point(1), false
+						d.select sqpin(nsp).point(2), false
+						d.select con
+					end if  
+				end if
+			end if
+		next k
+	next i
+	d.delete
+
+	'Attach Segment Assembly to the Constraints of the Original Rectangle
+	ncp = 0
+	for i = 1 to d.constraints.count
+		for k = 1 to d.constraints.item(i).pointcount
+			if ( d.constraints.item(i).point(k).body.ID = rec_sel.ID ) then
+				d.select d.constraints.item(i)
+				d.split
+				set p = d.constraints.item(i).point(k)
+				ncp = ncp + 1
+				set cp(ncp) = p
+				cp_x(ncp) = p.px.value
+				cp_y(ncp) = p.py.value
+				if ( align = true ) then
+					index = int ( ( ( p.px.value + length / 2.0 ) / length ) * n_seg ) + 1
+					if index = n_seg + 1 then
+						set p.body = seg(index-1)
+						p.px.value = l_seg / 2.0
+					else
+						set p.body = seg(index)
+						p.px.value = p.px.value + length / 2.0 - ( index - 1 ) * ( l_seg - ov ) - l_seg / 2.0
+					end if
+				end if
+				if ( align = false ) then
+					index = int ( ( ( - p.py.value + length / 2.0 ) / length ) * n_seg ) + 1
+					if index = n_seg + 1 then
+						set p.body = seg(index-1)
+						hold_x = p.px.value
+						p.px.value = l_seg / 2.0
+						p.py.value = hold_x
+					else
+						set p.body = seg(index)
+						hold_x = p.px.value
+						p.px.value = - p.py.value + length / 2.0 - ( index - 1 ) * ( l_seg - ov ) - l_seg / 2.0
+						p.py.value = hold_x
+					end if
+				end if
+				d.join
+
+				'Make Sure Flexible Body Does Not Collide with Attached Bodies
+				d.selectall false
+				for j = 1 to d.constraints.item(i).pointcount
+					if k <> j then
+						d.select d.constraints.item(i).point(j).body
+					end if
+				next j
+				for j = 1 to n_seg
+					d.select seg(j)
+				next j
+				d.collide false
+
+			end if
+		next k
+	next i
+
+	'Delete the Original Rectangle
+	d.selectall false
+	d.select rec_sel
+	d.delete
+	seg(1).pr.value = ang_rad * 180 / Pi
+
+End Sub
+
+Sub Main()
+	dim d as WMDocument		: set d = WM.ActiveDocument
+	dim theBody as WMBody
+	dim d1 as FlexDialog
+	dim l as double
+	dim stiff as double
+	dim length as double
+	dim weight as double
+	dim strength as double
+	dim n_elements as integer
+	dim tok as integer
+	dim yon as string
+	dim sseg as string
+	dim name_flex as string
+	dim flex_go as boolean
+	dim cantileaver as boolean
+
+	StrengthToWeight = 3.0
+
+	'Identify rigid rectangular body to be made flexible
+	GetRectangle flex_go, d, theBody, name_flex, cantileaver
+
+	'If selected body found, make beam flexible
+	if flex_go = true then
+
+		'Establish appropriate unit system
+		if mid(d.ForceUnit, 1, 2) = "ne" then
+   			d.MassUnit = "Kilograms"
+   			d.DistanceUnit = "meters"
+   			d.ForceUnit = "Newtons"
+		else 
+			if mid(d.ForceUnit, 1, 2) = "po" then
+   				d.MassUnit = "Earth Pounds"
+   				d.DistanceUnit = "inches"
+   				d.ForceUnit = "Pounds"
+			else
+				msgbox "This script will run with the force units pounds and Newtons, not " + d.ForceUnit
+				flex_go = false
+			end if
+		end if
+	
+	end if
+
+	'Continue if unit system is either SI or English
+	if flex_go = true then
+
+		'Determine what is rigid and what is flexible
+		'Find length of beam
+		if theBody.width.value > theBody.height.value then
+			length = theBody.width.value
+		else
+			length = theBody.height.value
+		end if
+
+		'Determine a characteristic load
+		weight = theBody.mass.value
+		if d.MassUnit = "kilograms" then
+			weight = theBody.mass.value * d.LinearGravityConst
+		end if
+
+		'Determine a characteristic load
+		strength = StrengthToWeight * weight
+		
+		'Flexibility condition is dependent on beam type
+		if cantileaver = true then
+			beam_type_factor = 16.0
+		else
+			beam_type_factor = 1.0
+		end if
+
+		'Calculate rigid and flexible
+		rigid = beam_type_factor * strength * length * length / 48.0 / 0.05
+		flexible = beam_type_factor * strength * length * length / 48.0 / 0.2 
+
+		'Engage dialog to determine the beam stiffness and the number of elements to be used
+   		tok = 1
+		While tok = 1 
+			tok = Dialog(d1)
+			if tok = -1 then
+   				n_elements = val(d1.textbox2)
+				stiff = val(d1.textbox1)
+
+   				'Make beam flexible
+				flex d, theBody, name_flex, stiff, n_elements
+
+			end if
+			if tok = 1 then
+				DisplayHelp
+			end if
+		Wend
+	end if
+
+End Sub

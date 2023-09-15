@@ -1,0 +1,262 @@
+%--------------------------------------------------------------------------
+h=errordlg('errorstring')
+
+Description: 
+errordlg('errorstring') displays a dialog box named 'Error Dialog' that
+contains the string 'errorstring'.
+%--------------------------------------------------------------------------
+ g= inline(expr,arg1,arg2,...)
+     
+Description: 
+inline(expr,arg1,arg2, ...) constructs an inline function whose input 
+arguments are specified by the strings arg1, arg2,.... Multicharacter
+    symbol names may be used.
+%--------------------------------------------------------------------------
+h = gline(fig)
+
+Description:
+gline(fig) allows you to draw a line segment in the figure fig by clicking 
+   the pointer at the two endpoints. A rubber band line tracks the pointer 
+   movement
+%--------------------------------------------------------------------------
+R = jacobian(f,v)
+
+Description: 
+jacobian(f,v) computes the Jacobian of the scalar or vector f with respect
+to v. 
+%--------------------------------------------------------------------------
+xlim([xmin xmax])
+
+Description:
+xlim([xmin xmax]) sets the axis limits in the current axes to the specified
+values.
+%--------------------------------------------------------------------------
+x = str2num('str')
+
+Description:
+x = str2num('str') converts the string str  to numeric representation.
+%--------------------------------------------------------------------------
+str = num2str(A)
+
+Description:
+The num2str function converts numbers to their string representations.
+%--------------------------------------------------------------------------
+t = strcat(s1, s2, s3, ...)
+   
+Description:
+t = strcat(s1, s2, s3, ...) horizontally concatenates corresponding rows of
+    the character arrays s1, s2, s3, etc. 
+%--------------------------------------------------------------------------
+tf = isempty(A)
+
+Description:
+tf = isempty(A) returns logical true (1) if A is an empty array and logical
+false (0) otherwise.
+%--------------------------------------------------------------------------
+get(h,'PropertyName')
+
+Description:
+get(h,'PropertyName') returns the value of the property 'PropertyName' of 
+the graphics object identified by h
+%--------------------------------------------------------------------------
+set(H,'PropertyName',PropertyValue,...)
+    
+Description:   
+set(H,'PropertyName',PropertyValue,...) sets the named properties to the 
+specified values on the object(s) identified by H.
+%--------------------------------------------------------------------------
+global X Y Z
+
+Description:
+global X Y Z defines X, Y, and Z as global in scope.
+%--------------------------------------------------------------------------
+tf = isequal(A, B, ...)
+    
+Description:
+tf = isequal(A, B, ...) returns logical 1 (true) if the input arrays are
+the same type and size and hold the same contents, and logical 0 (false)
+otherwise.
+%--------------------------------------------------------------------------    
+Sharing Data Between Callbacks
+
+Description:
+You can share data between callbacks by storing the data in the MATLAB 
+handles structure.
+
+For example,to store data contained in vector X in the handles structure,you
+Choose a name for the field of the handles structure where you want to 
+store the data, for example, handles.my_data Add the field to the handles
+ structure and set it equal to X with the following statement:
+ 
+     handles.my_data = X;
+
+Save the handles structure with the guidata function: 
+guidata(hObject,handles)
+
+     handles.my_data = X;
+
+To retrieve X in another callback, use the command
+
+     X = handles.my_data;
+%--------------------------------------------------------------------------
+[m,n] = size(X)
+
+Description:
+[m,n] = size(X) returns the size of matrix X in separate variables m and n
+%--------------------------------------------------------------------------
+Y = inv(X)
+
+Description:
+Y = inv(X) returns the inverse of the square matrix X.
+%--------------------------------------------------------------------------
+h = findobj('PropertyName',PropertyValue,...)
+    
+Description:    
+h = findobj('PropertyName',PropertyValue,...) returns the handles of all 
+    graphics objects having the property PropertyName, set to the value 
+PropertyValue. You can specify more than one property/value pair, in which 
+case, findobj returns only those objects having all specified values.
+%--------------------------------------------------------------------------
+rectangle('Position',[x,y,w,h])
+
+Description: 
+rectangle('Position',[x,y,w,h]) draws the rectangle from the point x,y and 
+having a width of w and a height of h. Specify values in axes data units.
+%--------------------------------------------------------------------------
+k = waitforbuttonpress
+
+Description: 
+k = waitforbuttonpress blocks the caller's execution stream until the
+function detects that the user has pressed a mouse button or a key while 
+the figure window is active. The function returns 0 if it detects a mouse
+button press 1 if it detects a key press 
+%--------------------------------------------------------------------------
+n = nargin
+
+Description:
+nargin returns the number of input arguments specified for a function.
+%--------------------------------------------------------------------------
+B = sqrt(X)
+
+Description:
+B = sqrt(X) returns the square root of each element of the array X.
+%--------------------------------------------------------------------------
+Y = abs(X)
+
+Description:
+abs(X) returns an array Y such that each element of Y is the absolute value
+of the corresponding element of X.
+%--------------------------------------------------------------------------
+k = strcmp('str1', 'str2')
+
+Description:
+k = strcmp('str1', 'str2') compares the strings str1 and str2 and returns 
+logical 1 (true) if the two are identical and logical 0 (false) otherwise. 
+%--------------------------------------------------------------------------
+F = getframe(h)
+
+Description:
+F = getframe(h) gets a frame from the figure or axes identified by handle h.
+%--------------------------------------------------------------------------
+[x,y] = ginput(n)
+
+Description:
+[x,y] = ginput(n) enables you to select n points from the current axes and 
+returns the x- and y-coordinates in the column vectors x and y,
+respectively. Press the Return key to terminate the input before entering 
+n points.
+%--------------------------------------------------------------------------
+grid on
+
+Description:
+grid on adds major grid lines to the current axes.
+%--------------------------------------------------------------------------
+h = gcf
+
+Description:
+h = gcf  returns the handle of the current figure. 
+%--------------------------------------------------------------------------
+h = gco
+
+Description:
+h = gco  returns the handle of the current object.
+%--------------------------------------------------------------------------
+A = imread(filename,fmt)
+
+Description:
+A = imread(filename,fmt) reads a grayscale or color image from the file
+specified by the string filename, where the string fmt specifies the format
+of the file. 
+%--------------------------------------------------------------------------
+movie(M,n)
+
+Description:
+movie(M) plays the movie in matrix M once, using the current axes as the 
+default target.
+%--------------------------------------------------------------------------
+tic
+    any statements 
+toc
+t = toc
+
+Description:
+tic starts a stopwatch timer. 
+toc prints the elapsed time since tic was used. 
+t = toc returns the elapsed time in t.
+%--------------------------------------------------------------------------
+h = imline(himage,x,y)
+
+Description:
+h = imline(hparent,x,y) creates a line on the object specified by hparent.
+The line can be dragged and resized interactively using the mouse. The 
+function returns h, a handle to the line, which is an hggroup object.
+%--------------------------------------------------------------------------
+subplot(m,n,p)
+
+Description:
+h = subplot(m,n,p) or subplot(mnp) breaks the figure window into an m-by-n
+matrix of small axes, selects the pth axes object for the current plot, and
+returns the axes handle. The axes are counted along the top row of the
+figure window, then the second row, etc.
+%--------------------------------------------------------------------------
+patch(x, y, [r g b])
+
+Description:
+patch(x, y, [r g b]) creates a solid patch of the color specified by the 
+vector [r g b], where r is the red component, g the green, and b the blue.
+%--------------------------------------------------------------------------
+line(X,Y,Z,'PropertyName',PropertyValue,...)
+    
+Description:    
+line(X,Y,Z,'PropertyName',PropertyValue,...) creates a line using the 
+    values for the property name/property value pairs specified and default
+    values for all other properties. 
+%--------------------------------------------------------------------------
+rotate(h,direction,alpha)
+
+Description: 
+rotate(h,direction,alpha) rotates the graphics object h by alpha degrees. 
+direction is a two- or three-element vector that describes the axis of 
+rotation in conjunction with the origin. 
+%--------------------------------------------------------------------------
+hold on
+
+Description:
+hold on retains the current plot and certain axes properties so that
+subsequent graphing commands add to the existing graph.
+%--------------------------------------------------------------------------
+pan on
+
+Description:
+pan on truns on mouse-based panning in the current figure
+%--------------------------------------------------------------------------
+pause(n)
+
+Description:
+pause(n) pauses execution for n seconds before continuing, where n can be 
+any nonnegative real number.
+%--------------------------------------------------------------------------
+
+
+
+

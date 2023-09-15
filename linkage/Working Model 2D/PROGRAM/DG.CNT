@@ -1,0 +1,53 @@
+:Base DG.HLP
+1 How to
+2 Display and Adjust the Grid=Displaying_and_Adjusting_the_Grid
+2 Adjust Attributes with the Dialog Box Information Dialog Box=Attributes_You_Can_Adjust_with_the_Dialog_Box_Information_Dialog_Box
+2 Change Titles and Labels=Changing_Titles_and_Labels
+2 Assign Accelerator Keys=Assigning_Accelerator_Keys
+2 Capture Standard Windows Dialog Boxes=Capturing_Standard_Windows_Dialog_Boxes
+2 Test Your Dialog Boxes=Testing_Your_Dialog_Boxes
+2 Incorporate Dialog Boxes or Controls into Your Script=Incorporating_Dialog_Boxes_or_Controls_into_Your_Script
+1 Adding and Duplicating Controls
+2 Adding Controls=Adding_Controls
+2 Duplicating Controls=Duplicating_Controls
+1 Selecting Items
+2 Selecting Controls=Selecting_Controls
+2 Selecting Dialog Boxes=Selecting_Dialog_Boxes
+1 Displaying the Information Dialog Boxes
+2 Displaying the Dialog Box Information Dialog Box=Displaying_the_Dialog_Box_Information_Dialog_Box
+2 Displaying the Information Dialog Boxes for Controls=Displaying_the_Information_Dialog_Boxes_for_Controls
+1 Attributes You Can Adjust with the Information Dialog Boxes for Controls
+2 Default OK Button Information Dialog Box=Default_OK_Button_Information_Dialog_Box
+2 Default Cancel Button Information Dialog Box=Default_Cancel_Button_Information_Dialog_Box
+2 Push Button Information Dialog Box=Push_Button_Information_Dialog_Box
+2 Option Button Information Dialog Box=Option_Button_Information_Dialog_Box
+2 Check Box Information Dialog Box=Check_Box_Information_Dialog_Box
+2 Group Box Information Dialog Box=Group_Box_Information_Dialog_Box
+2 Text Information Dialog Box=Text_Information_Dialog_Box
+2 Text Box Information Dialog Box=Text_Box_Information_Dialog_Box
+2 List Box Information Dialog Box=List_Box_Information_Dialog_Box
+2 Combo Box Information Dialog Box=Combo_Box_Information_Dialog_Box
+2 Drop List Box Information Dialog Box=Drop_List_Box_Information_Dialog_Box
+2 Picture Information Dialog Box=Picture_Information_Dialog_Box
+2 Picture Button Information Dialog Box=Picture_Button_Information_Dialog_Box
+1 Repositioning Items
+2 Repositioning Items with the Mouse=Repositioning_an_Item_with_the_Mouse
+2 Repositioning Items with the Arrow Keys=Repositioning_an_Item_with_the_Arrow_Keys
+2 Repositioning Dialog Boxes with the Dialog Box Information Dialog Box=Repositioning_a_Dialog_Box_with_the_Dialog_Box_Information_Dialog_Box
+2 Repositioning Controls with the Information Dialog Box=Repositioning_a_Control_with_the_Information_Dialog_Box
+1 Resizing Items
+2 Resizing Items with the Mouse=Resizing_an_Item_with_the_Mouse
+2 Resizing Items with the Information Dialog Box=Resizing_an_Item_with_the_Information_Dialog_Box
+2 Resizing Selected Items Automatically=Resizing_Selected_Items_Automatically
+1 Adding Pictures
+2 Specifying Pictures from Files=Specifying_Pictures_from_Files
+2 Specifying Pictures from Picture Libraries=Specifying_Pictures_from_Picture_Libraries
+1 Pasting Items into Dialog Editor
+2 Pasting Existing Dialog Boxes into Dialog Editor=Pasting_Existing_Dialog_Boxes_into_Dialog_Editor
+2 Pasting One or More Controls from Existing Dialog Boxes into Dialog Editor=Pasting_One_or_More_Controls_from_Existing_Dialog_Boxes_into_Dialog_Editor
+1 Menu Commands and Toolbar Tools
+2 File Menu=File_Menu
+2 Edit Menu=Edit_Menu
+2 Controls Menu/Tools=Controls_Menu_Tools
+2 Help Menu=Help_Menu
+2 Pick Tool=Pick_Tool

@@ -1,0 +1,258 @@
+Begin Dialog RestoDialog ,,180,44,"Restore All"
+	OKButton 132,8,40,14
+	CancelButton 132,28,40,14
+	GroupBox 12,8,108,32,"Restore all flexible bodies?",.GroupBox1
+	OptionGroup .OptionGroup1
+		OptionButton 32,28,24,8,"Yes",.OptionButton1
+		OptionButton 80,28,20,8,"No",.OptionButton2
+End Dialog
+Sub unflex(go as boolean, name_seg as string)
+	dim d as WMDocument:  set d = WM.ActiveDocument
+	dim b as WMBody
+	dim seg(50) as WMBody
+	dim rec_rest as WMBody
+	dim c as WMConstraint
+	dim con as WMConstraint
+	dim sqpin(10) as WMConstraint
+	dim p as WMPoint
+	dim l_seg as double
+	dim t_seg as double
+	dim ov as double
+	dim length as double
+	dim ang_rad as double
+	dim cant_value as double
+	dim m_seg as double
+	dim n_obs as integer
+	dim n_constraints as integer
+	dim n_bods as integer
+	dim n_seg as integer
+	dim i as integer
+	dim index as integer
+	dim sname1 as string
+	dim sname2 as string
+
+	'Set boolean to false for no flexible bodies in present document
+	go = false
+
+	'Find the segments making up the flexible body
+	d.selectall true
+	n_obs = d.selection.count
+	n_constraints = d.constraints.count
+	n_bods = 0
+	n_seg = 0
+	for i = 1 to n_obs
+		if d.selection.item(i).kind = "body" then
+			n_bods = n_bods + 1
+			set b = d.selection.body(n_bods)
+			if b.kind = "rectangle" then
+				sname1 = mid(b.name,1,11)
+				if sname1 = name_seg then
+
+					'Set boolean to true because flexible body of name given by string name_seg detected
+					go = true
+
+					if mid(b.name,12,12) = "0" then
+						if mid(b.name,13,13) = "0" then	
+							index = val(mid(b.name,14,14))
+						else
+							index = val(mid(b.name,13,14))
+						end if
+					else
+						index = val(mid(b.name,12,14))
+					end if
+				   	set seg(index) = b
+					if index > n_seg then
+						n_seg = index
+					end if
+				end if
+			end if
+		end if
+	next i
+
+	if go = true then
+		'Dimensions of the segments
+		l_seg = seg(1).width.value
+		t_seg = seg(1).height.value
+		m_seg = seg(1).mass.value
+
+		'Find the overlap in the attachment of the springs
+		for i = 1 to n_constraints
+			if d.constraints.item(i).point(1).body.name = name_seg & str(1) then
+				if d.constraints.item(i).point(2).body.name = name_seg & str(2) then
+					ov = l_seg / 2 - d.constraints.item(i).point(1).px.value
+				end if
+			end if
+		next i
+
+		'Create the rigid rectangle
+		length = n_seg * l_seg - (n_seg -1) * ov
+		set rec_rest = d.Newbody("rectangle")
+		rec_rest.height.value = t_seg
+		rec_rest.width.value = length
+		rec_rest.mass.value = n_seg * m_seg
+		rec_rest.pr.value = seg(1).pr.value
+		ang_rad = rec_rest.pr.value * Pi / 180
+		rec_rest.px.value = seg(1).px.value + (length - l_seg) * cos(ang_rad) / 2.0
+		rec_rest.py.value = seg(1).py.value + (length - l_seg) * sin(ang_rad) / 2.0
+
+		'Remove the rotational springs holding the segments together
+		d.selectall false
+		for i = 1 to n_constraints
+			if d.constraints.item(i).kind = "rotationalspring" then
+				sname1 = mid(d.constraints.item(i).point(1).body.name, 1, 11 )
+				sname2 = mid(d.constraints.item(i).point(2).body.name, 1, 11 )
+				if sname1 = name_seg then
+					if sname2 = name_seg then
+						EI = d.constraints.item(i).k.value * l_seg
+						d.select d.constraints.item(i)
+					end if
+				end if
+			end if
+			if d.constraints.item(i).kind = "pin" then
+				sname1 = mid(d.constraints.item(i).point(1).body.name, 1, 11 )
+				sname2 = mid(d.constraints.item(i).point(2).body.name, 1, 11 )
+				if sname1 = name_seg then
+					if sname2 = name_seg then
+						d.select d.constraints.item(i)
+					end if
+				end if
+			end if
+		next i
+		d.delete
+
+		'Attach all external constraints of flexible body to the rigid rectangle
+		n_constraints = d.constraints.count
+		for i = 1 to n_constraints
+	   		for j = 1 to d.constraints.item(i).pointcount
+	   			for k = 1 to n_seg
+					if d.constraints.item(i).point(j).body.name = seg(k).name then
+				 		set c = d.constraints.item(i)
+						d.split					
+				 		set p = c.point(j)
+						x_hold = p.px.value
+				 		set p.body = rec_rest
+						p.px.value = (k-1) * (l_seg - ov) + l_seg / 2.0 + x_hold - length / 2.0
+						d.join
+			  		end if
+		   		next k
+	   		next j
+   		next i
+
+		'Replace Cantilever Rotational Spring with a Square Pin
+		d.selectall false
+		cant_value = EI * 6 * n_seg / l_seg / (3.0 * n_seg - 1.0)
+		nsp = 0
+		
+		for i = 1 to d.constraints.count
+			if d.constraints.item(i).name = name_seg & "_cant" then
+				for k = 1 to d.constraints.item(i).pointcount
+			  		if ( d.constraints.item(i).point(k).body.ID = rec_rest.ID ) then
+				 		set con = d.constraints.item(i)
+				  		if abs(con.point(k).px.value) = length / 2.0  or abs(con.point(k).py.value) = length / 2.0 then
+				   			nsp = nsp + 1
+							set sqpin(nsp) = d.NewConstraint("squarepin")
+					 		d.split
+					 		set sqpin(nsp).point(1).body = con.point(1).body
+					 		set sqpin(nsp).point(2).body = con.point(2).body
+					   		sqpin(nsp).point(2).px.value = con.point(2).px.value
+					   		sqpin(nsp).point(2).py.value = con.point(2).py.value
+					   		sqpin(nsp).point(1).px.value = con.point(1).px.value
+					   		sqpin(nsp).point(1).py.value = con.point(1).py.value
+
+							d.join
+							d.select sqpin(nsp), false
+							d.select sqpin(nsp).point(1), false
+							d.select sqpin(nsp).point(2), false
+							d.select con
+						end if
+					end if  
+				next k
+			end if
+		next i
+		d.delete
+
+  		d.selectall false
+  		for k = 1 to n_seg
+			d.select seg(k)
+ 		next k
+  		d.delete
+
+   		d.select rec_rest
+
+	end if  
+				
+end sub
+
+Sub Main()
+	dim d as WMDocument		: set d = WM.ActiveDocument
+	dim d1 as RestoDialog
+	dim index as integer
+	dim i as integer
+	dim j as integer
+	dim j_max as integer
+	dim uname(20) as string
+	dim sseg as string
+	dim go_unflex as boolean
+	dim new_index as boolean
+
+	go_unflex = true
+	index = 0
+
+	'unflex the selected flexible bodies
+	for i = 1 to d.selection.count
+		if mid(d.selection.item(i).name, 1, 8) = "flexbeam" then
+			index = index + 1
+			uname(index) = mid(d.selection.item(i).name, 1, 11)
+			if index > 1 then
+				j = 1
+				new_index = true
+				while new_index = true
+					if uname(index) = uname(j) then
+						index = index - 1
+						new_index = false
+					else
+				   		j = j + 1
+						if j = index then
+							new_index = false
+						end if
+					end if
+				wend
+			end if
+		end if
+	next i
+	for i = 1 to index
+		unflex go_unflex, uname(i)
+	next i				
+	
+	'If no selection, unflex all ot them?
+	if index = 0 then
+		tok = Dialog(d1)
+		if d1.OptionGroup1 = 0 then
+  			uname(1) = "flexbeam001"
+   			uname(2) = "flexbeam002"
+  			uname(3) = "flexbeam003"
+  			uname(4) = "flexbeam004"
+  			uname(5) = "flexbeam005"
+  			uname(6) = "flexbeam006"
+  			uname(7) = "flexbeam007"
+  			uname(8) = "flexbeam008"
+  			uname(9) = "flexbeam009"
+  			uname(10) = "flexbeam010"
+  			uname(11) = "flexbeam011"
+  			uname(12) = "flexbeam012"
+  			uname(13) = "flexbeam013"
+  			uname(14) = "flexbeam014"
+  			uname(15) = "flexbeam015"
+  			uname(16) = "flexbeam016"
+  			uname(17) = "flexbeam017"
+  			uname(18) = "flexbeam018"
+  			uname(19) = "flexbeam019"
+  			uname(20) = "flexbeam020"
+
+  			for i = 1 to 20
+   				unflex go_unflex, uname(i)
+   			next i
+		end if
+	end if
+
+End Sub

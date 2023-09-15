@@ -1,0 +1,436 @@
+' ******************************************************************************
+' REPEAT.WBS - SELECT AND RUN MULTIPLE FILES FOR SPECIFIED # OF FRAMES
+'	
+'	This Working Model script allows a user to select a group of Working
+'	Model files and run those files for a specified number of frames.  If
+'	no frame count is specified, a simulation will run indefinitely or
+'	until a Pause Control condition is encountered (e.g. Pause When).
+'
+' Version 1.0, Created by Knowledge Revolution
+' (C) Copyright Knowledge Revolution 1995   All Rights Reserved
+'
+' ******************************************************************************
+
+
+'**Problem with selecting A drive when there's no disk in it
+
+
+Dim ChooseFiles$()
+Dim SelectedFiles$()
+Dim SelectPath$()
+Dim Directories$()
+Dim Frames As Variant
+
+Sub CheckPlatform
+'--------------------------------------------------------------------------------
+' Checks the operating system.  If it's not Windows then the script terminates.
+'--------------------------------------------------------------------------------
+	If ((Basic.OS <> ebWin16) and (Basic.OS <> ebWin32)) Then
+		MsgBox "This script will only execute on the Windows platform."
+		Stop
+	End If		
+End Sub
+
+Sub IfEmpty
+'--------------------------
+' Disables empty listboxes.
+'--------------------------
+	If SelectedFiles(Lbound(SelectedFiles)) = Empty Then
+		DlgEnable "SelectedFiles", False
+	End If
+	If ChooseFiles(Lbound(ChooseFiles)) = Empty Then
+		DlgEnable "ChooseFiles", False
+	End If
+	If Directories(Lbound(Directories)) = Empty Then
+		DlgEnable "Directories", False
+	End If
+End Sub
+
+Function Handle(ControlName$, Action%, SuppValue%) as Integer
+'-------------------------
+' Handles dialog commands.
+'-------------------------
+	Select Case Action
+	Case 1
+		'Gives dialog box initial values
+		DlgText "Search", "*.WM"
+		GetFiles
+		DlgText "NumFrames", "30"
+
+		'Refresh ListBoxes
+		DlgListBoxArray "ChooseFiles", ChooseFiles
+		DlgListBoxArray "SelectedFiles", SelectedFiles
+		DlgListBoxArray "Directories", Directories
+		
+		IfEmpty
+		
+	Case 2
+		'Handles dialog commands
+	   	If ControlName$ = "OK" And DlgFocus$() = "ChooseFiles" Or DlgFocus$() = "Add" Then
+			If ChooseFiles(Lbound(ChooseFiles)) <> Empty Then
+				SelectFile
+			End If
+			Handle = 1
+	   	ElseIf ControlName$ = "OK" And DlgFocus$() = "SelectedFiles" Or DlgFocus$() = "Remove" Then
+			If SelectedFiles(Lbound(SelectedFiles)) <> Empty Then
+				RemoveFile
+			End If
+			Handle = 1
+		ElseIf ControlName$ = "OK" And DlgFocus$() = "Directories" Then
+			ChangeDirs
+			Handle = 1
+		ElseIf ControlName$ = "OK" And DlgFocus$() = "Search" Then
+			GetFiles
+			Handle = 1
+		ElseIf ControlName$ = "OK" Then
+			If IsNumeric(DlgText$("NumFrames")) Then
+				Frames = CInt(DlgText$("NumFrames"))
+			End If
+		End If
+
+		IfEmpty
+   	End Select
+End Function
+
+Sub SelectFile
+'---------------------------------------------------------------------------------
+' Adds selected files to the SelectedFiles and SelectPath arrays.  SelectedFiles
+' is used to update the SelectedFiles list box, and SelectPath stores the full
+' pathname of the selected file for duplication checking and running the file.
+'---------------------------------------------------------------------------------
+	DlgEnable "SelectedFiles", True
+
+	'Dimension array if not already
+	If ArrayDims(SelectedFiles) = 0 Then
+		Redim SelectedFiles(0 To 0)
+		Redim SelectPath(0 To 0)
+	End If
+
+	'Add name to SelectedFiles
+	If SelectedFiles(Lbound(SelectedFiles)) = Empty Then
+		SelectedFiles(Ubound(SelectedFiles)) = DlgText$("ChooseFiles")
+		If Right$(CurDir$, 1) = "\" Then
+			SelectPath(Ubound(SelectPath)) = CurDir$ + DlgText$("ChooseFiles")
+		Else
+			SelectPath(Ubound(SelectPath)) = CurDir$ + "\" + DlgText$("ChooseFiles")
+		End	If
+	Else
+		Redim Preserve SelectedFiles(Lbound(SelectedFiles) To Ubound(SelectedFiles) + 1)
+		Redim Preserve SelectPath(Lbound(SelectPath) To Ubound(SelectPath) + 1)
+		SelectedFiles(Ubound(SelectedFiles)) = DlgText$("ChooseFiles")
+		If Right$(CurDir$, 1) = "\" Then
+			SelectPath(Ubound(SelectPath)) = CurDir$ + DlgText$("ChooseFiles")
+		Else
+			SelectPath(Ubound(SelectPath)) = CurDir$ + "\" + DlgText$("ChooseFiles")
+		End	If
+	End If
+
+ 	'Refresh SelectedFiles
+	DlgListBoxArray "SelectedFiles", SelectedFiles
+	DlgText "SelectedFiles", DlgText$("ChooseFiles")
+
+	'Remove name from ChooseFiles
+	FileIndex% = DlgValue("ChooseFiles")
+	If FileIndex < Ubound(ChooseFiles) Then
+		For i = FileIndex To (Ubound(ChooseFiles) - 1)
+			ChooseFiles(i) = ChooseFiles(i + 1)
+		Next i
+		Redim Preserve ChooseFiles(Lbound(ChooseFiles) To Ubound(ChooseFiles) - 1)
+	ElseIf Ubound(ChooseFiles) = 0 Then
+		Redim ChooseFiles(0 To 0)
+
+		'Shift focus away from empty listbox
+		If SelectedFiles(Lbound(SelectedFiles)) <> Empty Then
+			DlgFocus "SelectedFiles"
+		Else
+			DlgFocus "Directories"
+		End If
+		DlgEnable "ChooseFiles", False
+	Else
+		Redim Preserve ChooseFiles(Lbound(ChooseFiles) To Ubound(ChooseFiles) - 1)
+	End If
+
+	'Refresh ChooseFiles
+	DlgListBoxArray "ChooseFiles", ChooseFiles		
+End Sub
+
+Sub RemoveFile
+'--------------------
+' De-selects a file.
+'--------------------
+	'Dimension SelectedFiles and SelectPath if not yet done
+	If ArrayDims(SelectedFiles) = 0 Then
+		Redim SelectedFiles(0 To 0)
+		Redim SelectPath(0 To 0)
+	End If
+
+	'Variable to test for file's original directory
+	Temp$ = SelectPath(DlgValue("SelectedFiles"))
+	Count% = Len(SelectPath(DlgValue("SelectedFiles"))) - Len(DlgText$("SelectedFiles")) - 1
+	TestDir$ = Left$(Temp, Count)
+	If Len(TestDir) = 2 Then TestDir = TestDir + "\"
+
+	'Enable ChooseFiles before putting a file back into it
+	If TestDir = CurDir$ Then
+		DlgEnable "ChooseFiles", True
+	End If
+	
+	'Put SelectedFiles back into ChooseFiles if they're in the right directory
+	If ChooseFiles(Lbound(ChooseFiles)) = Empty And TestDir = CurDir$ Then
+		ChooseFiles(Ubound(ChooseFiles)) = DlgText$("SelectedFiles")
+
+	   	'Refresh and alphabetize list
+		ArraySort ChooseFiles
+		DlgListBoxArray "ChooseFiles", ChooseFiles
+		DlgText "ChooseFiles", DlgText$("SelectedFiles")
+  	ElseIf TestDir = CurDir$ Then
+   		Redim Preserve ChooseFiles(Lbound(ChooseFiles) To Ubound(ChooseFiles) + 1)
+   		ChooseFiles(Ubound(ChooseFiles)) = DlgText$("SelectedFiles")
+
+	   	'Refresh and alphabetize list
+		ArraySort ChooseFiles
+   		DlgListBoxArray "ChooseFiles", ChooseFiles
+   		DlgText "ChooseFiles", DlgText$("SelectedFiles")
+	End If
+
+	'Remove file from SelectedFiles
+	FileIndex% = DlgValue("SelectedFiles")
+	If FileIndex < Ubound(SelectedFiles) Then
+ 		For i = FileIndex To (Ubound(SelectedFiles) - 1)
+ 			SelectedFiles(i) = SelectedFiles(i + 1)
+   			SelectPath(i) = SelectPath(i + 1)
+		Next i				   
+		Redim Preserve SelectedFiles(Lbound(SelectedFiles) To Ubound(SelectedFiles) - 1)
+		Redim Preserve SelectPath(Lbound(SelectPath) To Ubound(SelectPath) - 1)
+	ElseIf Ubound(SelectedFiles) = 0 Then
+		Redim SelectedFiles(0 To 0)
+		Redim SelectPath(0 To 0)
+
+		'Shift focus away from empty listbox
+		If ChooseFiles(Lbound(ChooseFiles)) <> Empty Then
+			DlgFocus "ChooseFiles"
+		Else
+			DlgFocus "Directories"
+		End If
+		
+		DlgEnable "SelectedFiles", False
+	Else
+		Redim Preserve SelectedFiles(Lbound(SelectedFiles) To Ubound(SelectedFiles) - 1) 
+		Redim Preserve SelectPath(Lbound(SelectPath) To Ubound(SelectPath) - 1)
+	End If
+	
+	'Refresh SelectedFiles
+	DlgListBoxArray "SelectedFiles", SelectedFiles
+End Sub
+
+Sub ChangeDirs
+'------------------------------------------------------------------------------
+' Updates the current directory and calls GetFiles to fill the Direcotry and 
+' ChooseFiles arrays with new values. 
+'------------------------------------------------------------------------------
+	'Change drives
+	If Left(DlgText$("Directories"),1) = "[" Then
+
+		'**Need to check for disk in drive
+
+	   	Strip$ = Mid$(DlgText$("Directories"),2,1)
+		ChDrive(Strip)
+		
+	'Change directories
+	ElseIf Right$(CurDir$,1) = "\" Then
+		Direct$ = CurDir$ + DlgText$("Directories")
+ 		ChDir(Direct)
+	Else
+		Direct = CurDir$ + "\" + DlgText$("Directories")
+		ChDir(Direct)	
+	End If
+	
+	'Fill arrays with new names
+	GetFiles
+
+	'Enable ChooseFiles if it's going from empty to not empty
+	If ChooseFiles(Lbound(ChooseFiles)) <> Empty Then
+		DlgEnable "ChooseFiles", True
+	End If
+
+	'Update
+	DlgText "CurrentDir", CurDir$
+	DlgListBoxArray "Directories", Directories
+	DlgListBoxArray "ChooseFiles", ChooseFiles
+	DlgListBoxArray "SelectedFiles", SelectedFiles
+
+	'Highlights the top item in directories after a change
+ 	DlgText "Directories", Directories(Lbound(Directories))
+End Sub
+
+Sub GetFiles
+'-------------------------------------------------------------
+' Fills the	Directory and ChooseFiles arrays with new values.
+'-------------------------------------------------------------
+	Dim Temp$()
+
+	'Get list of directories and disk drives and alphabetize them
+	FileDirs Directories
+	ArraySort Directories
+	DiskDrives Temp
+	ArraySort Temp
+
+	'Add ".." to directories list
+	If Directories(Lbound(Directories)) <> "." Then
+		Redim Preserve Directories(Lbound(Directories) To Ubound(Directories) + 1)
+		For i = Ubound(Directories) To Lbound(Directories) + 1 Step -1
+	  		Directories(i) = Directories(i - 1)
+		Next i
+		Directories(Lbound(Directories)) = ".."
+	Else
+		For i = Lbound(Directories) To Ubound(Directories) - 1
+			Directories(i) = Directories(i + 1)
+		Next i
+		Redim Preserve Directories(Lbound(Directories) To Ubound(Directories) - 1)
+	End If
+
+	'Add brackets to drives
+	For i = Lbound(Temp) To Ubound(Temp)
+		Temp(i) = "[" & Temp(i) & "]"
+	Next i
+
+	'Put directories and drives together in one array
+	If ArrayDims(Directories) <> 0 And ArrayDims(Temp) <> 0 Then
+		Redim Preserve Directories(Lbound(Directories) To Ubound(Directories) + Ubound(Temp) + 1) 
+		For i = Lbound(Temp) To Ubound(Temp)
+			Directories(Ubound(Directories) - Ubound(Temp) + i) = Temp(i)
+		Next i
+	ElseIf ArrayDims(Directories) = 0 And ArrayDims(Temp) <> 0 Then
+		FileDirs Directories		
+	End If			
+
+	'Update ChooseFiles
+	FileList ChooseFiles, DlgText$("Search"), (ebNormal), 81
+	ArraySort ChooseFiles
+	If ArrayDims(ChooseFiles) = 0 Then
+		Redim ChooseFiles(0 To 0)
+	Else
+		DlgEnable "ChooseFiles", True
+	End If
+
+	'Dimension SelectedFiles and SelectPath if not already done
+	If ArrayDims(SelectedFiles) = 0 Then
+		Redim SelectedFiles(0 To 0)
+		Redim SelectPath(0 To 0)
+	End If
+
+ 	'Check for duplicate filenames -- don't list already selected files
+	If SelectedFiles(Lbound(SelectedFiles)) <> Empty And ChooseFiles(Lbound(ChooseFiles)) <> Empty Then
+		If Ubound(ChooseFiles) = 0 Then
+ 			For i = Lbound(SelectPath) To Ubound(SelectPath)
+	   			If SelectPath(i) = CurDir$ & "\" & ChooseFiles(Ubound(ChooseFiles)) Then
+					ChooseFiles(Lbound(ChooseFiles)) = Empty
+		 		End If
+	  	 	Next i
+   		Else
+			z% = 0
+  	 		For i = Lbound(SelectPath) To Ubound(SelectPath)
+	  			For n = Lbound(ChooseFiles) To Ubound(ChooseFiles)
+		   			If SelectPath(i) = CurDir$ & "\" & ChooseFiles(n) Or SelectPath(i) = CurDir$ & ChooseFiles(n) And n < Ubound(ChooseFiles) Then
+			  			For j = n To (Ubound(ChooseFiles) - 1)
+							ChooseFiles(j) = ChooseFiles(j + 1)
+							
+							'Erase duplicate name -- otherwise gets counted again
+							ChooseFiles(j + 1) = Empty
+			   			Next j
+						z = z + 1
+					ElseIf SelectPath(i) = CurDir$ & "\" & ChooseFiles(n) Then
+						z = z + 1
+		   	   		End If
+	   	   		Next n
+   	   		Next i
+
+			'Erase duplicate filenames.  If all are same, redim array.
+			If z > Ubound(ChooseFiles) Then
+				Redim ChooseFiles(0 To 0)
+			Else
+				Redim Preserve ChooseFiles(Lbound(ChooseFiles) To Ubound(ChooseFiles) - z)
+			End If
+		End If
+	End If
+	DlgListBoxArray "ChooseFiles", ChooseFiles
+End Sub	
+
+Sub ShowDialog
+'-------------------------
+' Defines the dialog box.
+'-------------------------
+	Begin Dialog FileSelect ,,232,155,"Multiple File Run",.Handle
+		Text 8,4,96,12,"Filename:"
+		TextBox 8,16,76,12,.Search
+		ListBox 8,30,76,56,ChooseFiles$,.ChooseFiles
+		Text 148,18,76,12,"Selected Files:"
+		ListBox 148,30,76,56,SelectedFiles$,.SelectedFiles
+		Text 8,90,96,10,"Directories:"
+		Text 8,100,150,10,CurDir$,.CurrentDir
+		ListBox 8,110,96,40,Directories$,.Directories
+		Text 130,124,48,8,"Frames to Run"
+		TextBox 110,122,17,12,.NumFrames
+		OKButton 184,112,40,14,.OK
+		CancelButton 184,132,40,14,.Cancel
+		PushButton 92,40,46,14,"Add >>",.Add
+		PushButton 92,60,46,14,"<< Remove",.Remove
+	End Dialog
+	Dim Batch as FileSelect
+ 	Dialog Batch
+End Sub
+
+Sub RunFiles(SelectPath$())
+'--------------------------------------------------------------------
+' Closes all open files and runs the selected files for a designated 
+' number of frames.
+'--------------------------------------------------------------------
+	Dim Doc as WMDocument
+	
+	'Run selected files
+	If SelectPath(Lbound(SelectPath)) <> Empty Then
+		'Close open files
+		m% = WM.Documents.Count
+		If m <> 0 Then
+			For i = 1 To m
+				Set Doc = WM.Documents.Item(i)
+				Doc.Close
+			Next i
+		End If
+
+		For i = Lbound(SelectPath) To Ubound(SelectPath)
+			Set Doc = WM.Open(SelectPath(i))
+
+			'If the number of frames to run is specified by the user,
+			'then run that many frames.  Otherwise no frames parameter.
+			If Frames <> Empty Then
+				temp% = Doc.Run(Frames)
+			Else
+				Doc.Run
+			End If
+
+			' Reset, save, and close the doc.  Reset so that the file is saved 
+			' with the frame indicator at 0, save so that the closing action would
+			' not interfere the batch process with "Do you want to save before close?"
+			Doc.Reset
+			Doc.Save
+			Doc.Close
+		Next i
+	End If
+End Sub
+
+Sub Main()
+'--------------------------------------------------------
+' Shows the dialog box and then runs the selected files.
+'--------------------------------------------------------
+	Dim Frames%
+
+	CheckPlatform
+	
+	ShowDialog
+	RunFiles SelectPath
+
+	'Clear SelectedFiles and SelectPaths
+	Redim SelectedFiles()
+	Redim SelectPath()
+End Sub

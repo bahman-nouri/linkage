@@ -1,0 +1,17 @@
+function [show]=currentobject(type)
+%this function set gco for user
+%type is string input and is type of object
+%that user want find
+waitfor
+cobj=get(gcf,'CurrentObject');
+if isempty(cobj)
+    show='Click somewhere else';
+    return
+end
+typ=get(cobj,'Type');
+cmp=strcmp(typ,type);
+if cmp==1
+    show=strcat('FOUND',type);
+else
+    show='NOT FOUND';
+end

@@ -1,0 +1,126 @@
+' -------------------------------------------------------------------------------------------
+'
+' Working Model 2D startup script
+' 
+' Last modified Dec 9, 1996
+'
+'
+
+Option Compare Text ' This makes string comparisons case-insensitive.
+
+Sub Main()
+
+	dim wmdirectory as string, sep as string
+	dim currentdirectory as string
+	currentdirectory = CurDir$
+	if basic.os = ebWin16 or basic.os = ebWin32 then
+	 	wmdirectory = wm.StartupDirectory
+	else
+		wmdirectory = CurDir$
+	end if
+	ChDir(wmdirectory)
+	
+	sep = Basic.PathSeparator$		' Stores the appropriate path separator for this platform
+	
+	' -------------------------------------------------------------------------------------------
+	' Define all the files with a wbs extension inside the scripts directory/folder
+	'
+	If (Dir$("SCRIPTS", ebDirectory) = "SCRIPTS") THEN	' The directory/folder SCRIPTS exists
+		Dim f(20) as string, fullname as string, scriptdir as string
+		scriptdir = wmdirectory + sep + "SCRIPTS" 
+		ChDir(scriptdir)					'Set to the SCRIPT directory
+		f(1) = Dir$("*.wbs")				' Find the first file with a .wbs extension
+		i% = 1
+		While (f(i) <> "") And (i < 20)		'Define the first 20 scripts found
+			fullname = scriptdir + sep + f(i)
+			WM.InsertMenuItem i, f(i), fullname
+			i = i+1
+			f(i) = Dir$						' Get next file with a .wbs extension
+		Wend
+	End If
+	
+	' -------------------------------------------------------------------------------------------
+	' Define the "Official KR" scripts
+	'
+	Dim krscripts as string
+	i% = 1
+	if ((Basic.OS = ebWin16) or (Basic.OS = ebWin32)) then
+
+		If (Dir$("KRDEMOS",ebDirectory) = "KRDEMOS") then	' The directory/folder KRDEMOS exists
+			krscripts = scriptdir + sep + "KRDEMOS" + sep
+			WM.InsertMenuItem i,"&Optimize", krscripts + "optimize.wbs"
+			i = i + 1
+			WM.InsertMenuItem i,"&Create Constraint", krscripts + "bldcons.wbs"
+			i = i + 1
+			WM.InsertMenuItem i,"&Document Model", krscripts + "docinfo.wbs"
+			i = i + 1
+			WM.InsertMenuItem i,"&Zoom to Extent", krscripts + "krzoom.wbs"
+			i = i + 1
+			WM.InsertMenuItem i,"Measure &Between Points", krscripts + "measure.wbs"
+			i = i + 1
+			WM.InsertMenuItem i,"&Flip Polygon", krscripts + "flipoly.wbs"
+			i = i + 1
+			WM.InsertMenuItem i,"&Multiple File Run", krscripts + "repeat.wbs"
+			i = i + 1
+			WM.InsertMenuItem i,"&Pin Friction", krscripts + "pinfric.wbs"
+			i = i + 1
+		end If		
+	
+		If (Dir$("FLEXBEAM",ebDirectory) = "FLEXBEAM") then	' The directory/folder FLEXBEAM exists
+			krscripts = scriptdir + sep + "FLEXBEAM" + sep
+			WM.InsertMenuItem i,"Fle&xbeam", krscripts + "Flexbeam.wbs"
+			i = i + 1
+			WM.InsertMenuItem i,"&Unflex", krscripts + "Unflex.wbs"
+			i = i + 1
+		end If		
+
+		If (Dir$("SHEAR",ebDirectory) = "SHEAR") then	' The directory/folder SHEAR exists
+			krscripts = scriptdir + sep + "SHEAR" + sep
+			WM.InsertMenuItem i,"&Shear && Bending Moment", krscripts + "shear.wbs"
+			i = i + 1
+		end If		
+
+	else
+
+		If (Dir$("KRDEMOS",ebDirectory) = "KRDEMOS") then	' The directory/folder KRDEMOS exists
+			krscripts = scriptdir + sep + "KRDEMOS" + sep
+			WM.InsertMenuItem i,"Optimize", krscripts + "optimize.wbs"
+			i = i + 1
+			WM.InsertMenuItem i,"Create Constraint", krscripts + "bldcons.wbs"
+			i = i + 1
+			WM.InsertMenuItem i,"Document Model", krscripts + "docinfo.wbs"
+			i = i + 1
+			WM.InsertMenuItem i,"Zoom to Extent", krscripts + "krzoom.wbs"
+			i = i + 1
+			WM.InsertMenuItem i,"Measure Between Points", krscripts + "measure.wbs"
+			i = i + 1
+			WM.InsertMenuItem i,"Flip Polygon", krscripts + "flipoly.wbs"
+			i = i + 1
+			WM.InsertMenuItem i,"Pin Friction", krscripts + "pinfric.wbs"
+			i = i + 1
+		end If		
+	
+		If (Dir$("FLEXBEAM",ebDirectory) = "FLEXBEAM") then	' The directory/folder FLEXBEAM exists
+			krscripts = scriptdir + sep + "FLEXBEAM" + sep
+			' menu divider:
+			'WM.InsertMenuItem i,"-", ""
+			'i = i + 1
+			WM.InsertMenuItem i,"Flexbeam", krscripts + "Flexbeam.wbs"
+			i = i + 1
+			WM.InsertMenuItem i,"Unflex", krscripts + "Unflex.wbs"
+			i = i + 1
+		end If		
+
+	end if
+	
+	' -------------------------------------------------------------------------------------------
+ 	' Run the User startup file
+	'
+	dim userstartup as string
+ 	userstartup = wmdirectory + sep + "startup.wbs"
+	If FileExists(userstartup) then
+ 		wm.RunScript userstartup
+	end If
+	
+	ChDir(currentdirectory)
+End Sub

@@ -1,0 +1,66 @@
+function out=Beam1(arg)
+
+global numbernode_1
+persistent xy
+if nargin==0
+    hf=get(0,'currentfigure');
+    if isempty(hf)
+        return
+    end
+    ha=get(hf,'currentaxes');
+    if isempty(ha)
+        return
+    end
+    v=get(gca,'view');
+    if any(v~=[0,90])
+        error('mmxy works only for 2-d axes.');
+    end
+    xlim=get(gca,'xlim');
+    ylim=get(gca,'ylim');
+    xy=[sum(xlim) sum(ylim)]/2;
+    text('parent',gca,'position',xy,'horizontalalignment'...
+        ,'left',...
+        'verticalalignment','bottom','tag','text');
+
+    set(hf,'pointer','arrow','doublebuffer','on',...
+        'windowbuttonmotionfcn'...
+        ,'Beam1 move','windowbuttondownfcn','Beam1 done');
+    figure(hf);
+    tf=waitforbuttonpress;
+    if~tf
+        p=plot(xy(1,1),xy(1,2),'ob');
+        set(p,'tag',num2str(numbernode_1));
+%-------------------------------------------------------------------
+        for t=1:20
+            beam=findobj('tag',num2str(t));
+            x1=get( beam,'xdata');
+            y1=get( beam,'ydata');
+            d_center=sqrt((x1-xy(1,1))^2+(y1-xy(1,2))^2);
+            if  d_center<=.2
+                set(p,'xdata',x1);
+                set(p,'ydata',y1);
+            end
+        end
+    end
+%--------------------------------------------------------------------
+elseif strcmp(arg,'move');
+    cp=get(gca,'currentpoint');
+    xy=cp(1,1:2);
+
+%--------------------------------------------------------------------
+    for t=1:20
+        beam=findobj('tag',num2str(t));
+        x1=get( beam,'xdata');
+        y1=get( beam,'ydata');
+        d_center=sqrt((x1-xy(1,1))^2+(y1-xy(1,2))^2);
+        if  d_center<=.2
+            set(beam,'color','r');
+        else
+            set(beam,'color','b');
+        end
+    end
+%---------------------------------------------------------------------
+elseif strcmp(arg,'done');
+    set(gcf,'pointer','arrow','doublebuffer','on',...
+        'windowbuttonmotionfcn','','windowbuttondownfcn','');
+end

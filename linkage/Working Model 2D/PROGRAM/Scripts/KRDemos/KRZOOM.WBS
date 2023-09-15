@@ -1,0 +1,29 @@
+' ******************************************************************************
+' ZOOMEXT.WBS - ZOOM TO A SIMULATION FILES EXTENTS
+'	
+'	This script will zoom the current simulation window so that all simulation
+'	entities and the origin fit within the screen boundaries.
+'
+' Version 2.0, Created by Knowledge Revolution
+' (C) Copyright Knowledge Revolution 1995-1996   All Rights Reserved
+'
+' ******************************************************************************
+
+
+Sub Main()
+	Dim Doc As WMDocument
+
+	Set Doc = WM.ActiveDocument
+	if (Doc is Nothing) then
+		MsgBox "No active document exists.", ebExclamation, "Zoom To Extent"
+		Exit Sub
+	end if
+
+	If Doc.Objects.Count = 0 Then
+		MsgBox "No object exists in the document.", ebInformation, "Zoom To Extent"
+		Exit Sub
+	end if
+
+	Doc.ZoomExtents
+	
+End Sub

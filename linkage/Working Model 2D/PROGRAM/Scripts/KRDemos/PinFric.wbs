@@ -1,0 +1,149 @@
+Sub GetPin(go as boolean, d as WMDocument, Pin_sel as WMConstraint )
+
+	dim c_terry as WMConstraint
+	dim con as WMConstraint
+	dim n_sel_constraints as integer			'Number of selected constraints
+	dim n_select as integer
+	dim n_constraints as integer
+	dim n_pin as integer 				'Number of selected pins
+	dim smsg as string
+	dim pin_no as string
+
+	go = false
+
+	n_sel_constraints = 0
+	n_select = d.selection.count
+	n_constraints = d.constraints.count
+	n_pin = 0
+
+	'Identify pin
+	for i = 1 to d.constraints.count
+		if d.constraints.item(i).kind = "pin" then
+			set pin_sel = d.constraints.item(i)
+			n_pin = n_pin + 1
+		end if
+	next i
+
+	if n_pin = 1 then
+		go = true
+	else	
+		n_select = d.selection.count
+		n_constraints = 0
+		n_pin = 0
+		for i = 1 to n_select
+			if d.selection.item(i).kind = "constraint" then
+				n_constraints = n_constraints + 1
+				set c_terry = d.selection.constraint(n_constraints)
+				if c_terry.kind = "pin" then
+					n_pin = n_pin + 1
+					set pin_sel = c_terry
+				end if
+				set c_terry = Nothing
+			end if	   
+		next i
+		if n_pin = 1 then
+			go = true
+		end if
+		if n_pin = 0 then
+			msgbox "There are no pins selected -- you must select one"
+		end if
+		if n_pin > 1 then
+			smsg = str(n_pin) & " pins selected -- you can only select one"
+			msgbox smsg
+		end if
+	end if
+end sub
+
+Sub Get_Angle_Conversion( d as WMDocument, convert as double )
+	convert = 1
+	if ( d.RotationUnit = "degrees" ) then
+		convert = 180/Pi
+	end if
+	if ( d.RotationUnit = "seconds" ) then
+		convert = 180.0*60.0*60.0/Pi
+	end if
+	if ( d.RotationUnit = "minutes" ) then
+		convert = 180.0*60.0/Pi
+	end if
+	if ( d.RotationUnit = "revolutions" ) then
+		convert = 1.0/2.0/Pi
+	end if
+
+End Sub
+
+Sub Make_Friction_Motor(d as WMDocument, Pin_sel as WMConstraint )
+	dim Body1 as WMBody
+	dim Body2 as WMBody
+	dim x1 as double
+	dim y1 as double
+	dim x2 as double
+	dim y2 as double
+	dim Random_Offset as double
+	dim friction as WMConstraint
+	dim Pin_Radius as WMInput
+	dim friction_coefficient as WMInput
+	dim convert as double
+
+	'Create Random Offset for locating slider controls
+	Randomize
+	Random_Offset = Random(-5000, 5000) / 100.0
+
+	Set Body1 = Pin_sel.point(1).body
+	Set Body2 = Pin_sel.point(2).body
+	x1 = Pin_sel.point(1).px.value
+	y1 = Pin_sel.point(1).py.value
+	x2 = Pin_sel.point(2).px.value
+	y2 = Pin_sel.point(2).py.value
+
+	d.selectall false
+	d.select Pin_sel
+	d.delete
+
+	set friction = d.NewConstraint("motor")
+	set Pin_Radius = d.NewInput()
+	Pin_Radius.name = "Constraint["+Cstr(friction.ID)+"] Pin Radius"
+	Pin_Radius.X = 100 + Random_Offset
+	Pin_Radius.Y = 50 + Random_Offset
+	set friction_coefficient = d.NewInput()
+	friction_coefficient.name = "Constraint["+Cstr(friction.ID)+"] Friction Coefficient"
+	friction_coefficient.X = 250 + Random_Offset
+	friction_coefficient.Y = 50 + Random_Offset
+
+	d.selectall false
+	d.select friction
+	d.split
+	set friction.point(1).body = Body1
+	set friction.point(2).body = Body2
+	friction.point(1).px.value = x1
+	friction.point(1).py.value = y1
+	friction.point(2).px.value = x2
+	friction.point(2).py.value = y2
+	d.selectall false
+	d.select friction
+	d.join
+
+	Get_Angle_Conversion d, convert 
+
+	friction.MotorType = "Torque"
+	fstring$ = "-Input["+Cstr(friction_coefficient.ID)+"]*Input["+Cstr(Pin_Radius.ID)+"]"
+	fstring$ = fstring$+"*|constraintforce("+Cstr(friction.ID)+")|"
+	friction.field.formula = fstring$+"*constraint["+Cstr(friction.ID)+"].dv.r/(abs(constraint["+Cstr(friction.ID)+"].dv.r)+"+Cstr(0.01*convert)+")"
+
+	d.selectall false
+	d.select Pin_Radius
+	d.select friction_coefficient
+
+End Sub
+
+Sub Main()
+	dim d as WMDocument: set d = WM.ActiveDocument
+	dim Pin_go as boolean
+	dim Pin_sel as WMConstraint
+	
+	GetPin Pin_go, d, Pin_sel
+
+	if Pin_go then
+		Make_Friction_Motor d, Pin_sel
+	end if
+	 
+End Sub

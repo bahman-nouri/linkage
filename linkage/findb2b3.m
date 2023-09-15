@@ -1,0 +1,21 @@
+function findb2b3
+maple('C1:=R3*cos(alpha2+xi3)-R2*cos(alpha3+xi2)');
+maple('C2:=R3*sin(alpha2+xi3)-R2*sin(alpha3+xi2)');
+maple('C3:=R1*cos(alpha3+xi1)-R3*cos(xi3)');
+maple('C4:=-R1*sin(alpha3+xi1)+R3*sin(xi3)');
+maple('C5:=R1*cos(alpha2+xi1)-R2*cos(xi2)');
+maple('C6:=-R1*sin(alpha2+xi1)+R2*sin(xi2)');
+A1=str2num(maple('-C3^2-C4^2'));
+A2=str2num(maple('C3*C6-C4*C5'));
+A3=str2num(maple('-C4*C6-C3*C5'));
+A4=str2num(maple('C2*C3+C1*C4'));
+A5=str2num(maple('C4*C5-C3*C6'));
+A6=str2num(maple('C1*C3-C2*C4'));
+k1=A2*A4+A3*A6;
+k2=A3*A4+A5*A6;
+k3=(A1^2-A2^2-A3^2-A4^2-A6^2)/2;
+beta3=2*atan((k2+(k1^2+k2^2-k3^2)^.5)/(k1+k3)');
+beta2=acos((A5*sin(beta3)+A3*cos(beta3)+A6)/A1);
+strcat('beta2:=',num2str(beta2));
+maple(strcat('beta2:=',num2str(beta2*180/pi)));
+maple(strcat('beta3:=',num2str(beta3*180/pi)));

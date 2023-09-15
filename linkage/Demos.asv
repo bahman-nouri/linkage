@@ -1,0 +1,300 @@
+function varargout = Demos(varargin)
+% DEMOS M-file for Demos.fig
+%      DEMOS, by itself, creates a new DEMOS or raises the existing
+%      singleton*.
+%
+%      H = DEMOS returns the handle to a new DEMOS or the handle to
+%      the existing singleton*.
+%
+%      DEMOS('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in DEMOS.M with the given input arguments.
+%
+%      DEMOS('Property','Value',...) creates a new DEMOS or raises the
+%      existing singleton*.  Starting from the left, property value pairs are
+%      applied to the GUI before Demos_OpeningFcn gets called.  An
+%      unrecognized property name or invalid value makes property application
+%      stop.  All inputs are passed to Demos_OpeningFcn via varargin.
+%
+%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
+%      instance to run (singleton)".
+%
+% See also: GUIDE, GUIDATA, GUIHANDLES
+
+% Edit the above text to modify the response to help Demos
+
+% Last Modified by GUIDE v2.5 27-Sep-2009 17:05:48
+
+% Begin initialization code - DO NOT EDIT
+gui_Singleton = 1;
+gui_State = struct('gui_Name',       mfilename, ...
+                   'gui_Singleton',  gui_Singleton, ...
+                   'gui_OpeningFcn', @Demos_OpeningFcn, ...
+                   'gui_OutputFcn',  @Demos_OutputFcn, ...
+                   'gui_LayoutFcn',  [] , ...
+                   'gui_Callback',   []);
+if nargin && ischar(varargin{1})
+    gui_State.gui_Callback = str2func(varargin{1});
+end
+
+if nargout
+    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+else
+    gui_mainfcn(gui_State, varargin{:});
+end
+% End initialization code - DO NOT EDIT
+
+
+% --- Executes just before Demos is made visible.
+function Demos_OpeningFcn(hObject, eventdata, handles, varargin)
+% This function has no output args, see OutputFcn.
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% varargin   command line arguments to Demos (see VARARGIN)
+
+% Choose default command line output for Demos
+handles.output = hObject;
+
+% Update handles structure
+guidata(hObject, handles);
+
+% UIWAIT makes Demos wait for user response (see UIRESUME)
+% uiwait(handles.figure1);
+
+
+% --- Outputs from this function are returned to the command line.
+function varargout = Demos_OutputFcn(hObject, eventdata, handles) 
+% varargout  cell array for returning output args (see VARARGOUT);
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Get default command line output from handles structure
+varargout{1} = handles.output;
+
+
+% --- Executes on button press in pushbutton1.
+function pushbutton1_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global demo
+a=get(handles.radiobutton1,'value');
+if a>0
+    G=0;
+else
+    G=1
+end
+if demo==1
+    m_657(G)
+end
+if demo==2
+    m_651(G)
+end
+if demo==3
+    m_652_2(G)
+end
+if demo==4
+    m_702(G)
+end
+if demo==5
+    m_703(G)
+end
+if demo==6
+    m_766(G)
+end
+if demo==7
+    m_745
+end
+if demo==8
+    m_746
+end
+if demo==9
+    m_679_2
+end
+if demo==10
+    m_684
+end
+function edit1_Callback(hObject, eventdata, handles)
+% hObject    handle to edit1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit1 as text
+%        str2double(get(hObject,'String')) returns contents of edit1 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --------------------------------------------------------------------
+function Untitled_1_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function Untitled_2_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function Untitled_3_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function class4_Callback(hObject, eventdata, handles)
+% hObject    handle to class4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function type14_Callback(hObject, eventdata, handles)
+% hObject    handle to type14 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global demo
+demo=9;
+h=imread('l6_type1.png');
+image(h);
+
+% --------------------------------------------------------------------
+function type24_Callback(hObject, eventdata, handles)
+% hObject    handle to type24 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global demo
+demo=10;
+h=imread('l6_type2.png');
+image(h);
+
+% --------------------------------------------------------------------
+function type13_Callback(hObject, eventdata, handles)
+% hObject    handle to type13 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global demo
+demo=7;
+h=imread('l4_type1.png');
+image(h);
+
+% --------------------------------------------------------------------
+function type23_Callback(hObject, eventdata, handles)
+% hObject    handle to type23 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global demo
+demo=8;
+h=imread('l4_type2.png');
+image(h);
+
+% --------------------------------------------------------------------
+function type12_Callback(hObject, eventdata, handles)
+% hObject    handle to type12 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global demo
+demo=4;
+h=imread('l3_type1.png');
+image(h);
+
+
+% --------------------------------------------------------------------
+function type22_Callback(hObject, eventdata, handles)
+% hObject    handle to type22 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global demo
+demo=5;
+h=imread('l3_type2.png');
+image(h);
+
+% --------------------------------------------------------------------
+function type32_Callback(hObject, eventdata, handles)
+% hObject    handle to type32 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global demo
+demo=6;
+h=imread('l3_type3.png');
+image(h);
+
+% --------------------------------------------------------------------
+function type11_Callback(hObject, eventdata, handles)
+% hObject    handle to type11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global demo
+demo=1;
+h=imread('l2_type1.png');
+image(h);
+
+% --------------------------------------------------------------------
+function type21_Callback(hObject, eventdata, handles)
+% hObject    handle to type21 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global demo
+demo=2;
+h=imread('l2_type2.png');
+image(h);
+
+% --------------------------------------------------------------------
+function type31_Callback(hObject, eventdata, handles)
+% hObject    handle to type31 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global demo
+demo=2;
+h=imread('l2_type3.png');
+image(h);
+
+
+% --- Executes on button press in radiobutton1.
+function radiobutton1_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton1
+a=get(handles.radiobutton2,'value');
+if a==1
+    set(handles.radiobutton2,'value',0);
+end
+
+% --- Executes on button press in radiobutton2.
+function radiobutton2_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton2
+a=get(handles.radiobutton1,'value');
+if a==1
+    set(handles.radiobutton1,'value',0);
+end
+
+% --- Executes on button press in pushbutton2.
+function pushbutton2_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+

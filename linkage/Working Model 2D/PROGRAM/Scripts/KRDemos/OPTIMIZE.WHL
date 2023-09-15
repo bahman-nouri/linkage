@@ -1,0 +1,29 @@
+// Help file for Optimize.wbs
+// Lines cannot get too long
+// Any line containing a comma needs to be enclosed in double quotes
+//
+You are running a simple optimizer.  This tool will optimize
+a desired behavior by iteratively modifying a design parameter.
+In technical terms the optimizer will solve:
+   min (cost(p)) for pmin<=p<=pmax
+"You can only have 1 parameter p, and one cost function."
+
+You can choose to run a demonstration of the optimizer on 
+"predefined models, or run the optimizer on your own model."
+"To run a demonstration, select Optimization Demo and follow"
+the instructions.
+"To set up your simulation for optimization, you should do"
+the following:
+1.  Select your parameter (it can be any property in your
+simulation).  Control that parameter via an input (control).
+This is usually done by selecting the object with the desired 
+"parameter, then choosing Define->Control and selecting the"
+desired property.
+2.  Name this input (control) "P0" (P-zero with no quotes).  
+You do this via the Appearance window.
+3.  Define the cost function you want minimized.  Create
+a meter named "Cost" which calculates the cost function.
+4.  Run the Optimize Tool.
+If you are running a demonstration file provided with this
+"module, it's been already prepared for optimization."
+[end]

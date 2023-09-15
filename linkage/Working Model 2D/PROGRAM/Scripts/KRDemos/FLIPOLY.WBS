@@ -1,0 +1,114 @@
+' ******************************************************************************
+' FLPPOLY.WBS - FLIPS ANY SELECTED POLYGON EITHER HORIZONTALLY OR VERTICALLY
+'	'
+' Version 1.0, Created by Knowledge Revolution
+' (C) Copyright Knowledge Revolution 1995   All Rights Reserved
+'
+' ******************************************************************************
+
+Dim Doc as WMDocument
+
+Function CheckSelection as boolean
+'--------------------------------------------------------------------------------
+'	This function checks to make sure the user has selected at least one polygon.
+'	If at least one polygon has been selected, the function returns as TRUE.
+'--------------------------------------------------------------------------------
+
+	Dim index as integer
+	Dim B1 as WMBody
+	Dim CS as Boolean
+
+	CheckSelection = false
+	If Doc.selection.count > 0 then
+		For index = 1 to Doc.selection.count
+			If Doc.selection.item(index).kind = "body" then
+				If Doc.body(Doc.selection.item(index).id).kind = "polygon" then
+					CheckSelection = True
+					index = Doc.selection.count
+				End if
+			End if
+		Next index
+	End if
+
+End function
+
+Function FlipDirection as string
+'--------------------------------------------------------------------------------
+'	This function asks the user which direction to flip the polygon.  It returns
+'	Horizontal, Vertical, or Cancel.
+'--------------------------------------------------------------------------------
+
+	r%=answerbox("Flip polygon horizontal or vertical?","Horizontal","Vertical","Cancel")
+
+	Select Case R
+		Case 1
+			FlipDirection = "Horizontal"
+		Case 2
+			FlipDirection = "Vertical"
+		Case 3
+			FlipDirection = "Cancel"
+	End Select
+
+End Function
+
+Sub FlipBodies (Direction as string)
+'--------------------------------------------------------------------------------
+'	This subroutine loops through all selected Working Model objects and flips
+'	all polygons it finds either horizontally or vertically.  This is done by
+'	looping through all the polygons vertices and changing the sign of the X field
+'	when flipping horizontally, and the Y field when flipping vertically.
+'--------------------------------------------------------------------------------
+
+	Dim B1 as WMBody
+	Dim index1 as integer
+	Dim index2 as integer
+	Dim x as double
+	Dim y as double
+	Dim tempheight as WMCell
+
+	If Direction <> "Cancel" then
+		For index1 = 1 to Doc.selection.count
+			If doc.selection.item(index1).kind = "body" then
+				Set B1 = Doc.body(Doc.selection.item(index1).id)
+				
+				If B1.kind = "polygon" then
+
+					' Curved bodies have vertices in polar coordinates, 
+					' so we need to make the body non-curved for the duration
+					wasCurved = B1.Curved
+					B1.Curved = FALSE
+
+					For index2 = 1 to B1.Vertexcount
+						B1.GetVertex index2, x, y
+						If Direction = "Horizontal" then
+							B1.AddVertex index2, -x, y
+						Elseif Direction = "Vertical" then
+							B1.AddVertex index2, x, -y
+						End if
+						B1.DeleteVertex index2+1
+					Next index2
+
+					B1.Curved = wasCurved
+
+				End if
+			End if
+		Next index1
+	End if
+End Sub
+
+Sub Main()
+'--------------------------------------------------------------------------------
+'	The main subroutine first makes calls to check what WM objects the user has
+'	selected, displaying an error message if no polygons are selected.  It then
+'	calls the routine that flips all polygons.
+'--------------------------------------------------------------------------------
+
+	Set Doc = WM.ActiveDocument
+	
+	If not CheckSelection then
+		msgbox "Incorrect selection.  To use the Mirror tool at least one polygon must be selected."
+	Else
+		FlipBodies(FlipDirection)
+	End if
+
+End Sub

@@ -1,0 +1,381 @@
+' ******************************************************************************
+' MKCONS5.WBS - CREATES CONSTRAINTS FROM USER SELECTED POINTS
+'	
+'	This Working Model script will create a constraint from points selected by
+'	the user.  If one point is selected, the user may create a Force or a Torque.
+'	If two points are selected, the user may create an actuator, damper
+'	pin joint, rod, rope, separator, spring, or springdamper.  If 3 or more points
+'	are selected, the user may create a pin joint.
+'
+' Version 1.0, Created by Knowledge Revolution
+' (C) Copyright Knowledge Revolution 1995   All Rights Reserved
+'
+' ******************************************************************************
+
+Dim MyDoc as WMDocument
+Dim ConstraintArray() as String
+Dim Numdigits as integer
+Dim CRLF as string
+global bodywidth as double
+
+
+Function StrDec(x as double, sigdigits as integer) as string
+'-------------------------------------------------------------------
+'	This function formats a string from a number passed to it.  The 
+'	string is left justified, and will have sigdigits decimal places.
+'-------------------------------------------------------------------
+
+	StrDec = Format(x, "0." + string(sigdigits,"0"))
+
+end function
+
+Function BodyCheck as boolean
+'-------------------------------------------------------------------
+'	This function returns "true" if any selected points are
+'	attached to the same body (or background).
+'-------------------------------------------------------------------
+
+	dim idarray(mydoc.selection.count) as integer
+
+	BodyCheck = False
+	idarray(1) = mydoc.selection.point(1).body.id
+
+	for i1 = 2 to mydoc.selection.count
+		for i2 = 1 to (i1-1)
+			if mydoc.selection.point(i1).body.id = idarray(i2) then
+				BodyCheck = True
+			end if
+		next i2		
+		idarray(i1) = mydoc.selection.point(i1).body.id
+	next i1
+end function
+
+Function PointsSelected as Integer
+'-------------------------------------------------------------------
+'	This routine counts the number of points selected.
+'-------------------------------------------------------------------
+
+	dim count as integer
+	dim i as integer
+
+	count = 0
+
+	For i = 1 to mydoc.selection.count
+		If not(Mydoc.Selection.Point(i) is nothing) then
+			count = count +1
+		End If
+	Next i
+	PointsSelected = count
+
+End Function
+
+Function InterpretSelection as String
+'-------------------------------------------------------------------
+'	This function checks to see what the user has selected in 
+'	Working Model.  An incorrect selection returns "Error".  One
+'   point returns "OnePoint".  Two points returns "TwoPoint".  Three
+'	points returns "MultiPoint".
+'-------------------------------------------------------------------
+
+	if Mydoc.selection.count = PointsSelected _
+		and Mydoc.selection.count > 0 then
+
+		If mydoc.selection.count = 1 then
+			InterpretSelection = "OnePoint"
+		Else 
+			if mydoc.selection.count = 2 then
+				InterpretSelection = "TwoPoint"	
+			Else 
+				if bodycheck then
+					InterpretSelection = "PointError"
+				else
+					InterpretSelection = "MultiPoint"
+				end if
+			end if
+		end if
+	Else
+		InterpretSelection = "Error"
+	End if	
+
+End Function
+
+Sub FillListAdd (List() as String, ctype as string)
+'-------------------------------------------------------------------
+'	This subroutine is used to fill the scrolling dialog box.
+'-------------------------------------------------------------------
+
+	if ctype = "OnePoint" then
+		redim list(1) as string
+		List(0) = "force"
+		List(1) = "torque"
+	else 
+		if ctype = "TwoPoint" then
+			redim list(7) as string
+ 			List(0) = "actuator"
+			List(1) = "damper"
+			List(2) = "pin"
+	      	List(3) = "rod"
+   			List(4) = "rope"	
+   			List(5) = "separator"
+   			List(6) = "spring"
+   			List(7) = "springdamper"
+   		else 
+			if ctype = "MultiPoint" then
+				redim list(0) as string
+ 				List(0) = "pin"
+			end if
+		end if
+	end if
+End Sub
+
+Function Angle (vec_x as double, vec_y as double) as Double
+'-------------------------------------------------------------------
+'	This function is used to calculate the angle an object should
+'	have in order to span two endpoints.
+'	Vec_x should equal:  point1_x - point2_x
+'	Vec_y should equal:  point1_y - point2_y
+'-------------------------------------------------------------------
+
+	dim CalcAngle as double
+
+	if vec_x = 0 then
+		angle = -PI/2
+	else
+		if vec_y = 0 then
+			angle = 0
+ 		else
+			CalcAngle = atn(vec_y/vec_x)
+			if vec_x > 0 then
+				angle = CalcAngle
+			else
+				angle = CalcAngle + PI
+			end if
+		end if
+	end if
+
+End Function
+
+Function xposglobal (pt as WMPoint) as double
+'-------------------------------------------------------------------
+'	This function calculates the x global position of a point.  If
+'	the point attached to the background, the x global position is
+'	simply its px.value.  If it is attached to a body, the global
+'	position must be calculated based upon the x and y local positions
+'	of the point, and the body's rotation.
+'-------------------------------------------------------------------
+
+	dim tbody as WMbody
+
+	If pt.body.id <> 0 then			  	
+		set tbody = pt.body
+		xposglobal = (cos(tbody.pr.value)*pt.px.value) - _
+						(sin(tbody.pr.value)*pt.py.value) + tbody.px.value
+	else
+		xposglobal = pt.px.value
+	end if
+
+end function
+
+Function yposglobal (pt as WMPoint) as double
+'-------------------------------------------------------------------
+'	This function calculates the y global position of a point.  If
+'	the point attached to the background, the y global position is
+'	simply its py.value.  If it is attached to a body, the global
+'	position must be calculated based upon the x and y local positions
+'	of the point, and the body's rotation.
+'-------------------------------------------------------------------
+
+	dim tbody as WMbody
+
+	If pt.body.id <> 0 then			  	
+		set tbody = pt.body
+		yposglobal = (sin(tbody.pr.value)*pt.px.value) + _
+						(cos(tbody.pr.value)*pt.py.value) + tbody.py.value
+	else
+		yposglobal = pt.py.value
+	end if
+
+end function
+
+Sub AddOnePoint(C as string)
+'-------------------------------------------------------------------
+'	This routine will add either a Force or a Torque to the 1 point
+'	selected.
+'-------------------------------------------------------------------
+
+	Dim P1 as WMPoint
+	Dim MyConstraint as WmConstraint
+
+	Set P1 = MyDoc.Selection.Point(1)
+
+	Set MyConstraint = MyDoc.NewConstraint(c)
+ 	Set MyConstraint.point(1).px.value = p1.px.value
+	Set MyConstraint.point(1).py.value = p1.py.value
+  	Set MyConstraint.point(1).body = p1.body
+	Set MyConstraint.point(1).px.formula = p1.px.formula
+	Set MyConstraint.point(1).py.formula = p1.py.formula
+
+	If p1.constraint is nothing then	' if point is not part
+		mydoc.delete p1				  	' of another constraint, 
+	end if							  	' delete original
+
+End Sub
+
+Sub AddTwoPoint(C as String)
+'-------------------------------------------------------------------
+'   This subrouting will create the chosen constraint between  
+'	two selected points.
+'-------------------------------------------------------------------
+
+	dim P1 as WMPoint
+	dim P2 as WMPoint
+	dim MyConstraint as WMConstraint
+
+	Set P1 = MyDoc.Selection.Point(1)
+	Set P2 = MyDoc.Selection.Point(2)
+ 	
+	if C = "pin" then
+		if BodyCheck then
+			r= msgbox ("2 points cannot be attached to the" + _
+						 " same body (or the background) when making a pin joint.", _
+						ebExclamation, "Selection Error")
+		else
+			Mydoc.Join
+		end if
+	else
+		Set MyConstraint = MyDoc.NewConstraint(c)
+		if c = "springdamper" or c = "rod" or c = "separator" or c = "rope" _ 
+				or c = "spring" then
+			Set MyConstraint.length.value = sqr((xposglobal(p1) - xposglobal(p2))^2 + _
+                                                (yposglobal(p1) - yposglobal(p2))^2)
+		end if
+	 	Set MyConstraint.point(1).px.value = p1.px.value
+		Set MyConstraint.point(1).py.value = p1.py.value
+  		Set MyConstraint.point(2).px.value = p2.px.value
+  		Set MyConstraint.point(2).py.value = p2.py.value
+  		Set MyConstraint.point(1).body = p1.body
+   		Set MyConstraint.point(2).body = p2.body
+		Set MyConstraint.point(1).px.formula = p1.px.formula
+		Set MyConstraint.point(1).py.formula = p1.py.formula
+		Set MyConstraint.point(2).px.formula = p2.px.formula
+		Set MyConstraint.point(2).py.formula = p2.py.formula
+
+		If p1.constraint is nothing then	' if point is not part
+			mydoc.delete p1				  	' of another constraint, 
+		end if							  	' delete original
+	
+		if p2.constraint is nothing then
+			mydoc.delete p2
+		end if
+	end if
+
+End Sub	
+
+Sub AddMultiPoint(C as String)
+'-------------------------------------------------------------------
+'   This subroutine will create a pin joint from multiple points by 
+'	doing multiple joins.  
+'-------------------------------------------------------------------
+
+	dim PointArray(mydoc.points.count) as WMPoint
+	dim numpoints as integer
+
+	numpoints = mydoc.selection.count
+
+	for i = 1 to numpoints
+		Set PointArray(i) = mydoc.selection.point(i)
+	next
+
+	Mydoc.SelectAll False
+
+	mydoc.select PointArray(1), true
+
+	for i = 2 to numpoints
+		mydoc.select PointArray(i), true
+		mydoc.join
+	next
+
+end sub
+	
+Sub AddControl(mode as string)
+'-------------------------------------------------------------------
+'	This routine displays the dialog box and then figures out what
+'	other routines to call based upon what the user selects.
+'-------------------------------------------------------------------
+
+Begin Dialog AddConstraintDialog 115,52,165,48,"Build Constraint"
+	ListBox 4,4,76,45,ConstraintArray$,.ConstraintList
+	PushButton 96,8,64,14,"Add",.Add
+	CancelButton 96,28,64,14,.cancel
+End Dialog
+
+ 	FillListAdd ConstraintArray,mode
+
+	Dim CD as AddConstraintDialog
+
+	rc=Dialog(CD,1)
+
+	If rc = 0 then
+		exit sub 
+	else        ' The user selected a scroll list item
+	   	if Mode = "OnePoint" then
+			AddOnePoint constraintArray(cd.constraintlist)
+		Else
+			if Mode = "TwoPoint" then
+				AddTwoPoint constraintArray(cd.constraintlist)
+			Else
+				if Mode = "MultiPoint" then
+					AddMultiPoint constraintArray(cd.constraintlist)
+				End if
+			End if
+		end if
+ 	End If
+
+End Sub
+
+Sub Main()
+'-------------------------------------------------------------------
+'	This routine controls the flow of the script.  It first calls
+'	a function to verify the user has selected only points.  It then
+'	passes control to a subroutine to display the dialog box.
+'-------------------------------------------------------------------
+
+	Set Mydoc = WM.Activedocument
+	dim mode as string
+
+	If Basic.OS = ebwin16 or Basic.OS = ebwin32 then	' Running windows
+		Crlf = chr$(13) + chr$(10)
+	else
+		If Basic.OS = ebmacintosh then			' Running Macintosh
+			Crlf = chr$(13)
+		else
+			r = msgbox ("ERROR:  Unknown operating system: " + Basic.OS, ebExclamation, "Operating System Error")
+			exit sub
+		end if
+	end if
+	
+	mode = InterpretSelection
+
+	if Mode = "Error" then
+		r = msgbox ("Only points may be selected when using this tool." + crlf + crlf +_
+			"This tool allows you to create constraints between points." + crlf + _
+			"The type of constraint that you can create depends on" + crlf +_
+			"the number of points selected:" + crlf + crlf +_
+			"A. 1 point  (Force, Torque)" + crlf +_ 
+			"B. 2 points (Actuator, Damper, Pin, Rod, Rope," + crlf +_
+			"                     Separator, Spring, Spring/Damper)" + crlf +_
+			"C. 3 or more points (Pin)", ebExclamation, "Selection Error") 
+	else
+		if Mode = "PointError" then
+			r= msgbox ("2 or more points cannot be attached to the same body" +_
+					" (or the background) when > 2 points are selected.", _
+						ebExclamation, "Selection Error")
+		else
+			numdigits = mydoc.decimaldigits
+			AddControl mode
+		end if
+	end if	
+	   
+End Sub
+
+
