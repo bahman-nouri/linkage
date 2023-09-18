@@ -12,7 +12,7 @@ The software's foundation is rooted in computational dynamics, drawing inspirati
 
 ![](Figures/linkage.png) 
 
-## 2- Dimensional design for mechanisms
+## 2- Dimensional design of mechanisms
 
 
 The software's second component focuses on dimensional design for mechanisms. It employs a dedicated app that enables users to input closed-loop equations and solve them to determine the necessary dimensions. Moreover, the software offers a variety of mechanisms suited for different applications, such as those designed for generating straight or circular paths, and users can conveniently choose the desired mechanism type.
